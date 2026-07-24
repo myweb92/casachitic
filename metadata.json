@@ -1,0 +1,6 @@
+{
+  "name": "Casa Chitic Boutique Hotel",
+  "description": "Premium, elegant boutique hotel website for Casa Chitic in Brașov, Romania, featuring luxurious warm aesthetics, rooms, gallery, and contact information.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

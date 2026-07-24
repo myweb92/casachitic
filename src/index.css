@@ -1,0 +1,76 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=Montserrat:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Cormorant Garamond", Georgia, serif;
+  --font-sans: "Montserrat", ui-sans-serif, system-ui, sans-serif;
+  
+  /* Clean Minimalism Boutique palette */
+  --color-hotel-beige: #f8f5f0;
+  --color-hotel-cream: #ffffff;
+  --color-hotel-sand: #e1dad0;
+  --color-hotel-terracotta: #8c3b2f;
+  --color-hotel-terracotta-dark: #702f25;
+  --color-hotel-gold: #b08d57;
+  --color-hotel-gold-dark: #917243;
+  --color-hotel-charcoal: #2a2420;
+  --color-hotel-charcoal-light: #3e352f;
+  --color-hotel-stone: #5d4a3e;
+}
+
+/* Base custom styles for smooth feel */
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background-color: var(--color-hotel-gold);
+  color: #1e1b18;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-hotel-beige);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-hotel-sand);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-hotel-gold);
+}
+
+div#root:nth-of-type(1) > div:nth-of-type(1) > section#rooms > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) {
+    display: none !important;
+}
+
+div#root:nth-of-type(1) > div:nth-of-type(1) > section#rooms > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) {
+    display: none !important;
+}
+
+div#root:nth-of-type(1) > div:nth-of-type(1) > section#rooms > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(4) {
+    display: none !important;
+}
+
+div#root:nth-of-type(1) > div:nth-of-type(1) > section#rooms > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(3) {
+    display: none !important;
+}
+
+div#root:nth-of-type(1) > div:nth-of-type(1) > section#rooms > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(5) {
+    display: none !important;
+}
+
+div#root:nth-of-type(1) > div:nth-of-type(1) > section#rooms > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(6) > div:nth-of-type(1) > img:nth-of-type(1) {
+    display: none !important;
+}
+
+div#root:nth-of-type(1) > div:nth-of-type(1) > section#rooms > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(6) > div:nth-of-type(2) {
+    display: none !important;
+}
