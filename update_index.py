@@ -1,0 +1,179 @@
+import os
+
+new_index_html = """<!doctype html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Home - Casa Chitic Balcescu</title>
+    <meta name='robots' content='index, max-snippet:-1, max-image-preview:large, max-video-preview:-1, follow' />
+    <meta name="google" content="nositelinkssearchbox" >
+    <link rel="canonical" href="https://casachiticbalcescu.ro/" />
+    <meta name="description" content="Casa Chitic Balcescu">
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","@id":"https://casachiticbalcescu.ro/#","name":"","url":"https://casachiticbalcescu.ro","logo":{"@type":"ImageObject","@id":"https://casachiticbalcescu.ro/#logo","inLanguage":"en-US"},"description":"Casa Chitic Balcescu"}</script>
+    <meta property="og:url" content="https://casachiticbalcescu.ro/" />
+    <meta property="og:site_name" content="Casa Chitic Balcescu" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Home - Casa Chitic Balcescu" />
+    <meta name="twitter:card" content="summary"/>
+    <meta name="twitter:locale" content="en_US"/>
+    <meta name="twitter:title"  content="Home - Casa Chitic Balcescu"/>
+    <meta name="twitter:url" content="https://casachiticbalcescu.ro/"/>
+    <link rel="icon" href="https://casachiticbalcescu.ro/wp-content/uploads/2025/02/cropped-WhatsApp-Image-2025-02-24-at-16.16.34-32x32.jpeg" sizes="32x32" />
+    <link rel="icon" href="https://casachiticbalcescu.ro/wp-content/uploads/2025/02/cropped-WhatsApp-Image-2025-02-24-at-16.16.34-192x192.jpeg" sizes="192x192" />
+    <link rel="apple-touch-icon" href="https://casachiticbalcescu.ro/wp-content/uploads/2025/02/cropped-WhatsApp-Image-2025-02-24-at-16.16.34-180x180.jpeg" />
+    <meta name="msapplication-TileImage" content="https://casachiticbalcescu.ro/wp-content/uploads/2025/02/cropped-WhatsApp-Image-2025-02-24-at-16.16.34-270x270.jpeg" />
+    <meta name="google-site-verification" content="mfOvf4NlzraMNd09Ho87VgNnqJf6rDWbpF4bdRDN9Ag" />
+
+    <!-- Google tag (gtag.js) snippet added by Site Kit -->
+    <script id="google_gtagjs-js" src="https://www.googletagmanager.com/gtag/js?id=GT-WRG34M5L" async></script>
+    <script id="google_gtagjs-js-after">
+    window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}
+    gtag("set","linker",{"domains":["casachiticbalcescu.ro"]});
+    gtag("js", new Date());
+    gtag("set", "developer_id.dZTNiMT", true);
+    gtag("config", "GT-WRG34M5L");
+     window._googlesitekit = window._googlesitekit || {}; window._googlesitekit.throttledEvents = []; window._googlesitekit.gtagEvent = (name, data) => { var key = JSON.stringify( { name, data } ); if ( !! window._googlesitekit.throttledEvents[ key ] ) { return; } window._googlesitekit.throttledEvents[ key ] = true; setTimeout( () => { delete window._googlesitekit.throttledEvents[ key ]; }, 5 ); gtag( "event", name, { ...data, event_source: "site-kit" } ); }; 
+    </script>
+    
+    <!-- ASKSUITE CODE START --> 
+    <script id="script-infochat" src='https://cdn.asksuite.com/infochat.js?dataConfig=https://control.asksuite.com/api/companies/casa-chitic-balcescu'>
+    </script> 
+    <!-- ASKSUITE CODE END -->
+
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-MDQNXQDG');</script>
+    <!-- End Google Tag Manager -->
+
+    <!-- Sojern Container Tag cp_v3_js, Pixel Version: 1 -->
+    <script src='https://static.sojern.com/utils/sjrn_autocx.js'></script>
+    <script>
+      (function () {
+        var params = {
+          hpr: "Casa Chitic",
+          hpid: "46",
+          sha256_eml: "",
+          sha1_eml: "",
+          md5_eml: "",
+          ccid: "",
+          pt: ""
+        };
+        params.et = {"HOME_PAGE":null,"SEARCH":"hs","PRODUCT":"hpr","SHOPPING_CART":"hcart","CONVERSION":"hc","TRACKING":null}[params.pt] || '';
+        try{params = Object.assign({}, sjrn_params, params);}catch(e){}
+        var paramsArr = [];
+        for(key in params) { paramsArr.push(key + '=' + encodeURIComponent(params[key])) };
+        var pl = document.createElement('iframe');
+        pl.type = 'text/html';
+        pl.setAttribute('style','height:0; width: 0; display:none;');
+        pl.async = true;
+        pl.src = "https://static.sojern.com/cip/c/45.html?f_v=cp_v3_js&p_v=1&" + paramsArr.join('&');
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(pl);
+      })();
+    </script>
+    <!-- End Sojern Tag -->
+  </head>
+  <body>
+    <!-- Start - Cloudbeds Amplify retargeting audience -->
+    <script type="text/javascript">
+          adroll_adv_id = "VYLTFVZ56BCP5MIXUE5BHD";
+          adroll_pix_id = "3T4ZKHGFZVF4BMOLXNBCB2";
+          adroll_version = "2.0";
+
+          (function(w, d, e, o, a) {
+              w.__adroll_loaded = true;
+              w.adroll = w.adroll || [];
+              w.adroll.f = [ 'setProperties', 'identify', 'track' ];
+              var roundtripUrl = "https://s.adroll.com/j/" + adroll_adv_id
+                      + "/roundtrip.js";
+              for (a = 0; a < w.adroll.f.length; a++) {
+                  w.adroll[w.adroll.f[a]] = w.adroll[w.adroll.f[a]] || (function(n) {
+                      return function() {
+                          w.adroll.push([ n, arguments ])
+                      }
+                  })(w.adroll.f[a])
+              }
+
+              e = d.createElement('script');
+              o = d.getElementsByTagName('script')[0];
+              e.async = 1;
+              e.src = roundtripUrl;
+              o.parentNode.insertBefore(e, o);
+          })(window, document);
+          adroll.track("pageView");
+    </script>
+    <!-- End - Cloudbeds Amplify retargeting audience -->
+
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MDQNXQDG"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+
+    <!-- Sojern Container Tag cp_v3_js, Pixel Version: 1 (HOME_PAGE) -->
+    <script src='https://static.sojern.com/utils/sjrn_autocx.js'></script>
+    <script>
+      (function () {
+        var params = {
+          hpr: "Casa Chitic",
+          hpid: "184869",
+          sha256_eml: "",
+          sha1_eml: "",
+          md5_eml: "",
+          ccid: "",
+          pt: "HOME_PAGE"
+        };
+        params.et = {"HOME_PAGE":null,"SEARCH":"hs","PRODUCT":"hpr","SHOPPING_CART":"hcart","CONVERSION":"hc","TRACKING":null}[params.pt] || '';
+        try{params = Object.assign({}, sjrn_params, params);}catch(e){}
+        var paramsArr = [];
+        for(key in params) { paramsArr.push(key + '=' + encodeURIComponent(params[key])) };
+        var pl = document.createElement('iframe');
+        pl.type = 'text/html';
+        pl.setAttribute('style','height:0; width: 0; display:none;');
+        pl.async = true;
+        pl.src = "https://static.sojern.com/cip/c/45.html?f_v=cp_v3_js&p_v=1&" + paramsArr.join('&');
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(pl);
+      })();
+    </script>
+    <!-- End Sojern Tag -->
+
+    <!-- Sojern Container Tag cp_v3_js, Pixel Version: 1 (PRODUCT) -->
+    <script src='https://static.sojern.com/utils/sjrn_autocx.js'></script>
+    <script>
+      (function () {
+        var params = {
+          hpr: "Casa Chitic",
+          hpid: "184869",
+          sha256_eml: "",
+          sha1_eml: "",
+          md5_eml: "",
+          ccid: "",
+          pt: "PRODUCT"
+        };
+        params.et = {"HOME_PAGE":null,"SEARCH":"hs","PRODUCT":"hpr","SHOPPING_CART":"hcart","CONVERSION":"hc","TRACKING":null}[params.pt] || '';
+        try{params = Object.assign({}, sjrn_params, params);}catch(e){}
+        var paramsArr = [];
+        for(key in params) { paramsArr.push(key + '=' + encodeURIComponent(params[key])) };
+        var pl = document.createElement('iframe');
+        pl.type = 'text/html';
+        pl.setAttribute('style','height:0; width: 0; display:none;');
+        pl.async = true;
+        pl.src = "https://static.sojern.com/cip/c/45.html?f_v=cp_v3_js&p_v=1&" + paramsArr.join('&');
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(pl);
+      })();
+    </script>
+    <!-- End Sojern Tag -->
+
+    <!-- Cloudbeds Guest Experience Live Chat Plugin -->
+    <script type="text/javascript" async defer>(function(){window.WhistleLiveChat={ company:"184869", source: "https://plugins.whistle.cloudbeds.com" };var e=document.createElement("script");e.async=!0,e.type="text/javascript",e.src=window.WhistleLiveChat.source + "/live-chat/initialize.js";var t=document.getElementsByTagName("script")[0];t.parentNode.insertBefore(e,t)}())</script>
+  </body>
+</html>"""
+
+with open("index.html", "w") as f:
+    f.write(new_index_html)

@@ -14,7 +14,7 @@ const ROOMS = [
   {
     title: "Deluxe Apartment",
     collection: "JOHANN GOTT 7",
-    size: "50 m\u00b2",
+    size: "55 m\u00b2",
     capacity: "2-4 Adults",
     bed: "1 Double Bed & Sofa",
     description:
@@ -30,7 +30,7 @@ const ROOMS = [
   {
     title: "Deluxe Suite",
     collection: "JOHANN GOTT 7",
-    size: "40 m\u00b2",
+    size: "50 m\u00b2",
     capacity: "2-4 Adults",
     bed: "1 Double Bed",
     description:
@@ -46,7 +46,7 @@ const ROOMS = [
   {
     title: "Deluxe Twin Room",
     collection: "JOHANN GOTT 7",
-    size: "20 m\u00b2",
+    size: "25 m\u00b2",
     capacity: "2 Adults",
     bed: "2 Single Beds",
     description:
@@ -62,16 +62,16 @@ const ROOMS = [
   {
     title: "Deluxe Double Room",
     collection: "JOHANN GOTT 7",
-    size: "20 m\u00b2",
+    size: "25 m\u00b2",
     capacity: "2 Adults",
     bed: "1 Double Bed",
     description:
       "Providing free toiletries, this double room includes a private bathroom with a walk-in shower, a hairdryer and slippers. The double room provides air conditioning, soundproof walls, a minibar, a wardrobe and a flat-screen TV with cable channels. The unit offers 1 bed.",
     badge: "QUIET",
     images: [
+      "https://h-img1.cloudbeds.com/uploads/184869/image-2~~6a3283b435512.jpg",
       "https://h-img2.cloudbeds.com/uploads/184869/image~~6a32839f156df.jpg",
       "https://h-img3.cloudbeds.com/uploads/184869/image-1~~6a3283b3a751d.jpg",
-      "https://h-img1.cloudbeds.com/uploads/184869/image-2~~6a3283b435512.jpg",
       "https://h-img1.cloudbeds.com/uploads/184869/image-3~~6a3283b628c43.jpg",
     ],
   },
@@ -117,7 +117,7 @@ const RoomCard: React.FC<{ room: (typeof ROOMS)[0] }> = ({ room }) => {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 0.5 }}
-      className="bg-white border border-hotel-sand hover:border-hotel-gold transition-colors duration-300 group flex flex-col"
+      className="bg-white border border-hotel-sand hover:border-hotel-gold transition-colors duration-300 group flex flex-col h-full flex-grow w-full"
     >
       {/* Image Carousel */}
       <div className="relative aspect-[4/3] overflow-hidden bg-gray-100">
@@ -289,11 +289,11 @@ export default function RoomTypes() {
             Choose from our carefully curated collections of rooms and suites.
           </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 auto-rows-fr">
           {ROOMS.map((room, idx) => (
             <div
               key={idx}
-              className={`md:col-span-1 lg:col-span-2 ${
+              className={`flex flex-col h-full md:col-span-1 lg:col-span-2 ${
                 idx === 3 ? "lg:col-start-2" : ""
               } ${idx === 4 ? "lg:col-start-4" : ""}`}
             >

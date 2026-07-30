@@ -4,25 +4,17 @@
  */
 
 import { RoomDetails, GalleryItem, FAQItem } from './types';
-import download1 from '../assets/download1.jpeg';
-import download2 from '../assets/download2.jpeg';
-import brasov from '../assets/brasov.webp';
+import headerImg from '../assets/Header.jpeg';
+import oldbrasov from '../assets/oldbrasov.png';
 import brasov1 from '../assets/brasov1.jpeg';
 
 export const HERO_SLIDES = [
   {
     id: 'slide-1',
-    image: download1,
+    image: headerImg,
     title: 'Casa Chitic',
     subtitle: 'Welcome to Casa Chitic Boutique Hotel',
     description: 'A historic sanctuary combining old-world Transylvanian soul with refined luxury in Brașov.'
-  },
-  {
-    id: 'slide-2',
-    image: download2,
-    title: 'In the Heart of Brașov',
-    subtitle: 'Steps from the Black Church',
-    description: 'Our boutique hotel sits on historic Strada Johann Gött, offering spectacular medieval vistas in every season.'
   }
 ];
 
@@ -31,7 +23,7 @@ export const ABOUT_TEXT = {
   paragraph1: 'Located in the historical heart of Brașov, just 100 meters from the majestic Black Church, Casa Chitic merges medieval Saxon charm with contemporary luxury hospitality. Our boutique hotel sits on a cobblestone-paved street, perfectly positioned to explore the winding stories, historic architecture, and scenic cafes of Transylvania.',
   paragraph2: 'Each of our meticulously designed rooms features genuine solid wood furniture, historical architectural preservation such as original wooden beams and restored brick arches, state-of-the-art air conditioning, high-speed Wi-Fi, modern Smart TVs, and a premium fully stocked minibar. Here, every detail is selected to cultivate an atmosphere of deep rest and authentic Romanian hospitality.',
   tagline: 'A sanctuary designed for discerning travelers who value story, craftsmanship, and serenity.',
-  imageHillside: brasov,
+  imageHillside: oldbrasov,
   imageRooftops: brasov1
 };
 
@@ -127,12 +119,6 @@ export const GALLERY_ITEMS: GalleryItem[] = [
     category: 'hotel'
   },
   {
-    id: 'gal-9',
-    url: download2,
-    caption: 'The imposing stone walls of the nearby Black Church',
-    category: 'city'
-  },
-  {
     id: 'gal-10',
     url: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1000&q=80',
     caption: 'Sun-drenched study desk in our Series room attic',
@@ -170,7 +156,7 @@ export const CONTACT_INFO = {
   phoneFormatted: '+40 720 331 144',
   address: 'Strada Johann Gött 7, Brașov, Romania',
   googleMapsEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2789.704652251239!2d25.58914847683416!3d45.6417772710777!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x40b35b7e805566cf%3A0x6e0e9069d2d88812!2sStrada%20Johann%20G%C3%B6tt%207%2C%20Bra%C8%99ov%20500007!5e0!3m2!1sen!2sro!4v1700000000000!5m2!1sen!2sro',
-  facebookUrl: 'https://facebook.com/casachitic',
-  instagramUrl: 'https://instagram.com/casachitic',
+  facebookUrl: 'https://www.facebook.com/casachitic/?locale=ro_RO',
+  instagramUrl: 'https://www.instagram.com/casachitic.brasov/',
   googleUrl: 'https://google.com/maps'
 };

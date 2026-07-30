@@ -1,44 +1,51 @@
-import React from 'react';
-import { motion } from 'motion/react';
-import { Landmark, ShieldCheck, Snowflake, Tv, Wine, Car } from 'lucide-react';
+import React from "react";
+import { motion } from "motion/react";
+import {
+  Landmark,
+  ShieldCheck,
+  Snowflake,
+  Tv,
+  Flower,
+  Car,
+} from "lucide-react";
 
 const EXPERIENCES_DATA = [
   {
     icon: <Landmark className="w-[18px] h-[18px] text-[#A67C52]" />,
-    badge: 'LOCATION',
-    title: 'Pedestrian Center',
-    desc: 'Located just 100m from the Black Church, perfectly positioned to explore the historic winding streets of Brașov.'
+    badge: "LOCATION",
+    title: "Pedestrian Center",
+    desc: "Located just 100m from the Black Church, perfectly positioned to explore the historic winding streets of Brașov.",
   },
   {
     icon: <ShieldCheck className="w-[18px] h-[18px] text-[#A67C52]" />,
-    badge: 'HERITAGE',
-    title: 'Solid Wood Furniture',
-    desc: 'Each room is uniquely furnished with artisan-crafted pieces that honor traditional Transylvanian woodworking.'
+    badge: "HERITAGE",
+    title: "Solid Wood Furniture",
+    desc: "Each room is uniquely furnished with artisan-crafted pieces that honor traditional Transylvanian woodworking.",
   },
   {
     icon: <Snowflake className="w-[18px] h-[18px] text-[#A67C52]" />,
-    badge: 'COMFORT',
-    title: 'Air Conditioning',
-    desc: 'State-of-the-art, silent climate control systems ensure a restful environment regardless of the season.'
+    badge: "COMFORT",
+    title: "Air Conditioning",
+    desc: "State-of-the-art, silent climate control systems ensure a restful environment regardless of the season.",
   },
   {
     icon: <Tv className="w-[18px] h-[18px] text-[#A67C52]" />,
-    badge: 'ENTERTAINMENT',
-    title: 'Smart TV & WiFi',
-    desc: 'Stay connected with high-speed internet and premium Smart TVs available in every single room.'
+    badge: "ENTERTAINMENT",
+    title: "Smart TV & WiFi",
+    desc: "Stay connected with high-speed internet and premium Smart TVs available in every single room.",
   },
   {
-    icon: <Wine className="w-[18px] h-[18px] text-[#A67C52]" />,
-    badge: 'GOURMET',
-    title: 'Premium Minibar',
-    desc: 'Enjoy a curated selection of fine beverages and gourmet snacks thoughtfully stocked in your room.'
+    icon: <Flower className="w-[18px] h-[18px] text-[#A67C52]" />,
+    badge: "COMING AUG 2027",
+    title: "Luxury SPA Center",
+    desc: "A sanctuary for body and mind. Currently undergoing restoration, our high-end wellness SPA will open in late summer 2027.",
   },
   {
     icon: <Car className="w-[18px] h-[18px] text-[#A67C52]" />,
-    badge: 'CONVENIENCE',
-    title: 'Private Parking',
-    desc: 'Secure nearby parking available for our guests, ensuring peace of mind during your stay in the pedestrian zone.'
-  }
+    badge: "CONVENIENCE",
+    title: "Private Parking",
+    desc: "Convenient, secure parking is available on-site for guests arriving by vehicle (reservation mandatory, daily surcharge applies, limited spots).",
+  },
 ];
 
 export default function Experiences() {
@@ -55,7 +62,9 @@ export default function Experiences() {
           </h2>
           <div className="w-12 h-[1px] bg-[#A67C52] mx-auto mb-5" />
           <p className="font-sans text-xs text-neutral-500 max-w-lg mx-auto leading-relaxed">
-            Every detail at Casa Chitic is designed to provide you with a seamless and luxurious stay. Discover the tailored amenities that await you.
+            Every detail at Casa Chitic is designed to provide you with a
+            seamless and luxurious stay. Discover the tailored amenities that
+            await you.
           </p>
         </div>
 
@@ -66,7 +75,7 @@ export default function Experiences() {
               key={idx}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-50px' }}
+              viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.5, delay: idx * 0.1 }}
               className="bg-white p-6 border border-[#DED9D2] shadow-sm transition-colors duration-300 hover:border-[#A67C52] relative overflow-hidden group flex flex-col"
             >

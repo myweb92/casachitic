@@ -8,15 +8,13 @@ import { motion, AnimatePresence } from "motion/react";
 import {
   Menu,
   X,
-  ChevronLeft,
-  ChevronRight,
   ArrowDown,
   PhoneCall,
   Facebook,
   Instagram,
 } from "lucide-react";
 import { Language } from "../types";
-import { HERO_SLIDES } from "../data";
+import { HERO_SLIDES, CONTACT_INFO } from "../data";
 import Logo from "./Logo";
 
 interface HeroCarouselProps {
@@ -34,14 +32,6 @@ export default function HeroCarousel({
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Auto-slide effect
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length);
-    }, 6000);
-    return () => clearInterval(timer);
-  }, []);
-
   // Handle scroll trigger for navbar
   useEffect(() => {
     const handleScroll = () => {
@@ -54,14 +44,6 @@ export default function HeroCarousel({
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length);
-  };
-
-  const prevSlide = () => {
-    setCurrentSlide((prev) => (prev === 0 ? HERO_SLIDES.length - 1 : prev - 1));
-  };
 
   const scrollToSection = (id: string) => {
     setMobileMenuOpen(false);
@@ -134,7 +116,9 @@ export default function HeroCarousel({
                 <span>+40 720 33 11 44</span>
               </a>
               <a
-                href="#"
+                href="https://wa.me/40720331144"
+                target="_blank"
+                rel="noreferrer"
                 className="text-hotel-beige hover:text-hotel-gold transition-colors"
                 aria-label="WhatsApp"
               >
@@ -150,14 +134,18 @@ export default function HeroCarousel({
                 </svg>
               </a>
               <a
-                href="#"
+                href={CONTACT_INFO.facebookUrl}
+                target="_blank"
+                rel="noreferrer"
                 className="text-hotel-beige hover:text-hotel-gold transition-colors"
                 aria-label="Facebook"
               >
                 <Facebook className="w-4 h-4" />
               </a>
               <a
-                href="#"
+                href={CONTACT_INFO.instagramUrl}
+                target="_blank"
+                rel="noreferrer"
                 className="text-hotel-beige hover:text-hotel-gold transition-colors"
                 aria-label="Instagram"
               >
@@ -302,43 +290,6 @@ export default function HeroCarousel({
             </button>
           </motion.div>
         </div>
-      </div>
-
-      {/* Carousel Arrows */}
-      <button
-        onClick={prevSlide}
-        className="absolute left-6 top-1/2 z-20 -translate-y-1/2 rounded-full border border-hotel-beige/10 bg-hotel-charcoal-light/40 backdrop-blur-sm p-3 text-hotel-beige transition-all hover:bg-hotel-gold hover:text-hotel-charcoal shadow-md"
-        aria-label="Previous slide"
-        id-attr="carousel-prev"
-      >
-        <ChevronLeft className="h-5 w-5" />
-      </button>
-      <button
-        onClick={nextSlide}
-        className="absolute right-6 top-1/2 z-20 -translate-y-1/2 rounded-full border border-hotel-beige/10 bg-hotel-charcoal-light/40 backdrop-blur-sm p-3 text-hotel-beige transition-all hover:bg-hotel-gold hover:text-hotel-charcoal shadow-md"
-        aria-label="Next slide"
-        id-attr="carousel-next"
-      >
-        <ChevronRight className="h-5 w-5" />
-      </button>
-
-      {/* Carousel Indicator Dots */}
-      <div
-        className="absolute bottom-8 left-1/2 z-20 flex -translate-x-1/2 gap-3"
-        id-attr="carousel-dots"
-      >
-        {HERO_SLIDES.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => setCurrentSlide(index)}
-            className={`h-1.5 rounded-full transition-all duration-300 ${
-              currentSlide === index
-                ? "w-8 bg-hotel-gold"
-                : "w-2 bg-hotel-beige/40"
-            }`}
-            aria-label={`Go to slide ${index + 1}`}
-          />
-        ))}
       </div>
 
       {/* Scroll Down Indicator */}
