@@ -150,13 +150,13 @@ export const FAQ_DATA: FAQItem[] = [
 ];
 
 export const CONTACT_INFO = {
-  email: 'office@casachiticbalcescu.ro',
-  website: 'www.casachiticbalcescu.ro',
-  phone: '0731.002.138',
-  phoneFormatted: '+40 731 002 138',
-  address: 'Strada Nicolae Balcescu 13, Brașov, Romania',
-  googleMapsEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2789.704652251239!2d25.58914847683416!3d45.6417772710777!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x40b35b7e805566cf%3A0x6e0e9069d2d88812!2sStrada%20Nicolae%20Balcescu%2013%2C%20Bra%C8%99ov!5e0!3m2!1sen!2sro!4v1700000000000!5m2!1sen!2sro',
-  facebookUrl: 'https://www.facebook.com/profile.php?id=61556292635319',
-  instagramUrl: 'https://www.instagram.com/casachitic/',
+  email: 'office@casachitic.ro',
+  website: 'www.casachitic.ro',
+  phone: '0720.331.144',
+  phoneFormatted: '+40 720 331 144',
+  address: 'Str. Johann Gott nr.7, Brașov, Romania',
+  googleMapsEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2789.704652251239!2d25.58914847683416!3d45.6417772710777!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x40b35b7e805566cf%3A0x6e0e9069d2d88812!2sStrada%20Johann%20G%C3%B6tt%207%2C%20Bra%C8%99ov%20500007!5e0!3m2!1sen!2sro!4v1700000000000!5m2!1sen!2sro',
+  facebookUrl: 'https://www.facebook.com/casachitic/?locale=ro_RO',
+  instagramUrl: 'https://www.instagram.com/casachitic.brasov/',
   googleUrl: 'https://google.com/maps'
 };
