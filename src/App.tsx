@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Language } from "./types";
 import HeroCarousel from "./components/HeroCarousel";
 import AboutUs from "./components/AboutUs";
@@ -16,6 +16,32 @@ import Footer from "./components/Footer";
 export default function App() {
   const [lang, setLang] = useState<Language>("en"); // Default to English by request, or can toggle easily!
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Diagnostic utility for WhistleLiveChat
+    console.log("WhistleLiveChat Diagnostic:");
+    console.log("window.location.hostname:", window.location.hostname);
+    
+    // Give the external script a bit of time to load and initialize
+    const checkInterval = setInterval(() => {
+      if ((window as any).WhistleLiveChat) {
+        console.log("✅ WhistleLiveChat object found on window:", (window as any).WhistleLiveChat);
+        clearInterval(checkInterval);
+      } else {
+        console.log("⏳ Waiting for WhistleLiveChat object to appear...");
+      }
+    }, 1000);
+
+    // Stop checking after 10 seconds
+    setTimeout(() => {
+      clearInterval(checkInterval);
+      if (!(window as any).WhistleLiveChat) {
+        console.error("❌ WhistleLiveChat object was NOT found on window after 10 seconds.");
+      }
+    }, 10000);
+
+    return () => clearInterval(checkInterval);
+  }, []);
 
   const handleHeroSeeDetails = () => {
     // Scroll to rooms section
