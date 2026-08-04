@@ -108,15 +108,15 @@ export default function HeroCarousel({
 
             <div className="flex items-center gap-3 xl:gap-4 ml-2 border-l border-hotel-beige/20 pl-4 xl:pl-6 shrink-0">
               <a
-                href="tel:+40720331144"
+                href={`tel:${CONTACT_INFO.phoneFormatted.replace(/\s+/g, '')}`}
                 className="flex items-center gap-1.5 text-hotel-beige hover:text-hotel-gold transition-colors font-sans text-sm xl:text-base font-bold tracking-wider"
                 aria-label="Phone"
               >
                 <PhoneCall className="w-4 h-4" />
-                <span>+40 720 33 11 44</span>
+                <span>{CONTACT_INFO.phoneFormatted}</span>
               </a>
               <a
-                href="https://wa.me/40720331144"
+                href={`https://wa.me/${CONTACT_INFO.phoneFormatted.replace(/\D/g, '')}`}
                 target="_blank"
                 rel="noreferrer"
                 className="text-hotel-beige hover:text-hotel-gold transition-colors"
@@ -162,8 +162,16 @@ export default function HeroCarousel({
             </div>
           </div>
 
-          {/* Language Selector (Header) & Mobile Menu Toggle */}
-          <div className="flex items-center gap-4 lg:hidden">
+          {/* Mobile Nav Elements & Mobile Menu Toggle */}
+          <div className="flex items-center gap-2 sm:gap-4 lg:hidden">
+            <a
+              href={`tel:${CONTACT_INFO.phoneFormatted.replace(/\s+/g, '')}`}
+              className="flex items-center gap-1.5 text-hotel-beige hover:text-hotel-gold transition-colors font-sans text-xs sm:text-sm font-normal whitespace-nowrap"
+              aria-label="Phone"
+            >
+              <PhoneCall className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span>{CONTACT_INFO.phoneFormatted}</span>
+            </a>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="rounded-sm p-1.5 text-hotel-beige hover:text-hotel-gold focus:outline-none"

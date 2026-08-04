@@ -54,7 +54,7 @@ export default function Footer({ lang, setLang }: FooterProps) {
     },
     {
       icon: <WhatsAppIcon className="h-4 w-4" />,
-      href: "https://wa.me/40720331144",
+      href: `https://wa.me/${CONTACT_INFO.phoneFormatted.replace(/\D/g, '')}`,
       label: "WhatsApp",
     },
   ];
@@ -512,7 +512,7 @@ export default function Footer({ lang, setLang }: FooterProps) {
                       CCB HOTELS SRL • Comuna Cristian, Sat Cristian, Nicolae
                       Iorga 32, Brașov County
                       <br />
-                      E-mail: office@casachitic.ro | Tel.: +40 720 331 144
+                      E-mail: {CONTACT_INFO.email} | Tel.: {CONTACT_INFO.phoneFormatted}
                     </p>
                   </>
                 ) : (
