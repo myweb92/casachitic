@@ -179,6 +179,18 @@ export default function Footer({ lang, setLang, onOpenAdmin }: FooterProps) {
               >
                 ANPC
               </a>
+              {onOpenAdmin && (
+                <>
+                  <span className="text-hotel-beige/20">•</span>
+                  <button
+                    onClick={onOpenAdmin}
+                    className="hover:text-hotel-gold transition-colors"
+                    title="Admin Portal"
+                  >
+                    Admin
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>

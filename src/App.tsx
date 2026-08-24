@@ -12,10 +12,41 @@ import Experiences from "./components/Experiences";
 import Reviews from "./components/Reviews";
 import ContactLocation from "./components/ContactLocation";
 import Footer from "./components/Footer";
+import AdminPanel from "./components/AdminPanel";
 
 export default function App() {
   const [lang, setLang] = useState<Language>("en"); // Default to English by request, or can toggle easily!
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
+  const [isAdminOpen, setIsAdminOpen] = useState(false);
+
+  useEffect(() => {
+    const checkAdminRoute = () => {
+      const path = window.location.pathname.toLowerCase();
+      const hash = window.location.hash.toLowerCase();
+      if (path === "/admin" || path.endsWith("/admin") || hash === "#admin") {
+        setIsAdminOpen(true);
+      }
+    };
+
+    checkAdminRoute();
+
+    window.addEventListener("popstate", checkAdminRoute);
+    return () => window.removeEventListener("popstate", checkAdminRoute);
+  }, []);
+
+  const handleOpenAdmin = () => {
+    setIsAdminOpen(true);
+    if (window.location.pathname.toLowerCase() !== "/admin") {
+      window.history.pushState(null, "", "/admin");
+    }
+  };
+
+  const handleCloseAdmin = () => {
+    setIsAdminOpen(false);
+    if (window.location.pathname.toLowerCase() === "/admin") {
+      window.history.pushState(null, "", "/");
+    }
+  };
 
   const handleHeroSeeDetails = () => {
     // Scroll to rooms section
@@ -55,7 +86,10 @@ export default function App() {
       <ContactLocation lang={lang} />
 
       {/* 9. Minimal heritage dark footer with social loops and logo */}
-      <Footer lang={lang} setLang={setLang} />
+      <Footer lang={lang} setLang={setLang} onOpenAdmin={handleOpenAdmin} />
+
+      {/* 10. Password Protected Admin Portal */}
+      <AdminPanel isOpen={isAdminOpen} onClose={handleCloseAdmin} />
     </div>
   );
 }
