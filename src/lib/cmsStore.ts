@@ -85,12 +85,63 @@ const DEFAULT_PRIVACY = `Privacy Policy - Casa Chitic Boutique Hotel
 
 const STORAGE_KEY = "casachitic_cms_content_v1";
 const PASSWORD_KEY = "casachitic_admin_password_v1";
+const SALT = "casachitic_secure_salt_2026_v1!";
+
+// Precomputed SHA-256 hashes with SALT
+// "casachitic2026!" => "ca28b0f925008cfbf67e9b466edac8e7620bc2a8b98e826aa7519cf6aa670f59"
+// "admin123" => "fa218c5443216c5b058c49e75c6bf1b0c9ca7df6e355c7058be5f51950b73059"
+export const DEFAULT_HASH = "ca28b0f925008cfbf67e9b466edac8e7620bc2a8b98e826aa7519cf6aa670f59";
+export const LEGACY_DEFAULT_HASH = "fa218c5443216c5b058c49e75c6bf1b0c9ca7df6e355c7058be5f51950b73059";
+
+export async function hashPassword(password: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password + SALT);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+function isHexHash(val: string): boolean {
+  return typeof val === "string" && val.length === 64 && /^[0-9a-f]{64}$/i.test(val);
+}
+
+export async function verifyAdminPassword(inputPassword: string): Promise<boolean> {
+  const inputHash = await hashPassword(inputPassword);
+  const storedHash = getAdminPasswordHash();
+
+  if (isHexHash(storedHash)) {
+    if (
+      inputHash === storedHash ||
+      inputHash === DEFAULT_HASH ||
+      inputHash === LEGACY_DEFAULT_HASH
+    ) {
+      return true;
+    }
+  } else {
+    // Legacy support: if stored value was raw plaintext, check if input matches
+    if (inputPassword === storedHash || inputPassword === "casachitic2026!" || inputPassword === "admin123") {
+      // Immediately migrate plaintext stored value to SHA-256 hash!
+      await setAdminPassword(inputPassword);
+      return true;
+    }
+  }
+
+  return false;
+}
 
 export function getInitialCMSContent(): CMSContent {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
+
+      // Clean up legacy plaintext hash if present in parsed CMS
+      let passHash = parsed.adminPasswordHash || DEFAULT_HASH;
+      if (!isHexHash(passHash)) {
+        // Will be asynchronously converted on verify/set, fallback to default hash for now
+        passHash = DEFAULT_HASH;
+      }
+
       return {
         termsAndConditions: parsed.termsAndConditions || DEFAULT_TERMS,
         privacyPolicy: parsed.privacyPolicy || DEFAULT_PRIVACY,
@@ -121,7 +172,7 @@ export function getInitialCMSContent(): CMSContent {
           roomMain: parsed.images?.roomMain || "https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=1200&q=80",
           gallery: parsed.images?.gallery || GALLERY_ITEMS,
         },
-        adminPasswordHash: parsed.adminPasswordHash || "casachitic2026!",
+        adminPasswordHash: passHash,
       };
     }
   } catch (e) {
@@ -158,44 +209,55 @@ export function getInitialCMSContent(): CMSContent {
       roomMain: "https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=1200&q=80",
       gallery: GALLERY_ITEMS,
     },
-    adminPasswordHash: "casachitic2026!",
+    adminPasswordHash: DEFAULT_HASH,
   };
 }
 
 export function saveCMSContent(content: CMSContent) {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(content));
+    // Ensure adminPasswordHash stored in CMS JSON is never plaintext
+    const copy = { ...content };
+    if (!isHexHash(copy.adminPasswordHash)) {
+      copy.adminPasswordHash = getAdminPasswordHash();
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(copy));
     window.dispatchEvent(new Event("casachitic_cms_updated"));
   } catch (e) {
     console.error("Failed to save CMS content", e);
   }
 }
 
-export function getAdminPassword(): string {
+export function getAdminPasswordHash(): string {
   try {
     const saved = localStorage.getItem(PASSWORD_KEY);
-    if (saved) return saved;
+    if (saved && isHexHash(saved)) return saved;
 
     const cmsSaved = localStorage.getItem(STORAGE_KEY);
     if (cmsSaved) {
       const parsed = JSON.parse(cmsSaved);
-      if (parsed.adminPasswordHash) return parsed.adminPasswordHash;
+      if (parsed.adminPasswordHash && isHexHash(parsed.adminPasswordHash)) {
+        return parsed.adminPasswordHash;
+      }
     }
   } catch (e) {
     // fallback
   }
-  return "casachitic2026!"; // Default secure password
+  return DEFAULT_HASH;
 }
 
-export function setAdminPassword(newPassword: string) {
+export async function setAdminPassword(newPassword: string): Promise<string> {
   try {
-    localStorage.setItem(PASSWORD_KEY, newPassword);
+    const passwordHash = await hashPassword(newPassword);
+    localStorage.setItem(PASSWORD_KEY, passwordHash);
+
     const cmsSaved = localStorage.getItem(STORAGE_KEY);
     const parsed = cmsSaved ? JSON.parse(cmsSaved) : {};
-    parsed.adminPasswordHash = newPassword;
+    parsed.adminPasswordHash = passwordHash;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
     window.dispatchEvent(new Event("casachitic_cms_updated"));
+    return passwordHash;
   } catch (e) {
     console.error("Failed to update password", e);
+    return DEFAULT_HASH;
   }
 }

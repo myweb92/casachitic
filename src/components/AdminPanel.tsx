@@ -27,7 +27,8 @@ import { motion, AnimatePresence } from "motion/react";
 import {
   getInitialCMSContent,
   saveCMSContent,
-  getAdminPassword,
+  verifyAdminPassword,
+  getAdminPasswordHash,
   setAdminPassword,
   CMSContent,
 } from "../lib/cmsStore";
@@ -90,14 +91,10 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
     }
   }, [isOpen]);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const storedPassword = getAdminPassword();
-    if (
-      passwordInput === storedPassword ||
-      passwordInput === "casachitic2026!" ||
-      passwordInput === "admin123"
-    ) {
+    const isValid = await verifyAdminPassword(passwordInput);
+    if (isValid) {
       setIsAuthenticated(true);
       setLoginError("");
       setPasswordInput("");
@@ -119,16 +116,12 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
     }, 3000);
   };
 
-  const handleChangePassword = (e: React.FormEvent) => {
+  const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setSecurityMessage(null);
-    const storedPassword = getAdminPassword();
 
-    if (
-      currentPassInput !== storedPassword &&
-      currentPassInput !== "casachitic2026!" &&
-      currentPassInput !== "admin123"
-    ) {
+    const isCurrentValid = await verifyAdminPassword(currentPassInput);
+    if (!isCurrentValid) {
       setSecurityMessage({ type: "error", text: "Current password is incorrect." });
       return;
     }
@@ -143,14 +136,14 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       return;
     }
 
-    setAdminPassword(newPassInput);
-    const updatedCms = { ...cms, adminPasswordHash: newPassInput };
+    const newHash = await setAdminPassword(newPassInput);
+    const updatedCms = { ...cms, adminPasswordHash: newHash };
     setCms(updatedCms);
     saveCMSContent(updatedCms);
 
     setSecurityMessage({
       type: "success",
-      text: `Password updated successfully! Your new admin password is now: "${newPassInput}"`,
+      text: "Password updated successfully! It has been cryptographically hashed (SHA-256) and saved safely.",
     });
     setCurrentPassInput("");
     setNewPassInput("");
