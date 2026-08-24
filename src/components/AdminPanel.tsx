@@ -19,6 +19,9 @@ import {
   EyeOff,
   Save,
   Sparkles,
+  Upload,
+  Plus,
+  Trash2,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import {
@@ -40,8 +43,36 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState("");
 
-  const [activeTab, setActiveTab] = useState<"legal" | "about" | "contact" | "security">("legal");
+  const [activeTab, setActiveTab] = useState<
+    "legal" | "about" | "images" | "contact" | "security"
+  >("legal");
   const [cms, setCms] = useState<CMSContent>(getInitialCMSContent());
+
+  // New Gallery Item state
+  const [newGalleryUrl, setNewGalleryUrl] = useState("");
+  const [newGalleryCaption, setNewGalleryCaption] = useState("");
+  const [newGalleryCategory, setNewGalleryCategory] = useState<"hotel" | "city">("hotel");
+
+  // Helper function to handle local image file upload & convert to Data URL
+  const handleFileUpload = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    onSuccess: (dataUrl: string) => void
+  ) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        alert("File size exceeds 5MB limit. Please choose a smaller image.");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === "string") {
+          onSuccess(reader.result);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   // Password change form states
   const [currentPassInput, setCurrentPassInput] = useState("");
@@ -279,6 +310,18 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                 </button>
 
                 <button
+                  onClick={() => setActiveTab("images")}
+                  className={`flex items-center gap-2 py-3.5 px-4 font-sans text-xs font-semibold tracking-wider uppercase border-b-2 transition-all whitespace-nowrap ${
+                    activeTab === "images"
+                      ? "border-hotel-gold text-hotel-charcoal bg-white/60"
+                      : "border-transparent text-hotel-stone hover:text-hotel-charcoal"
+                  }`}
+                >
+                  <ImageIcon className="h-4 w-4" />
+                  <span>Gallery & Images</span>
+                </button>
+
+                <button
                   onClick={() => setActiveTab("contact")}
                   className={`flex items-center gap-2 py-3.5 px-4 font-sans text-xs font-semibold tracking-wider uppercase border-b-2 transition-all whitespace-nowrap ${
                     activeTab === "contact"
@@ -452,6 +495,286 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                         }
                         className="w-full p-2.5 text-xs bg-white border border-hotel-stone/40 rounded"
                       />
+                    </div>
+                  </div>
+                )}
+
+                {/* 2.5 IMAGES & GALLERY TAB */}
+                {activeTab === "images" && (
+                  <div className="space-y-6">
+                    <div className="bg-white p-4 rounded border border-hotel-stone/30 space-y-4">
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-hotel-gold flex items-center gap-1.5">
+                        <ImageIcon className="h-4 w-4" />
+                        Website Hero & Section Background Images
+                      </h3>
+
+                      {/* Hero Header Image */}
+                      <div>
+                        <label className="block text-[11px] font-semibold uppercase tracking-wider text-hotel-charcoal mb-1">
+                          Hero Header Background Image
+                        </label>
+                        <div className="flex gap-2 items-center">
+                          <input
+                            type="text"
+                            value={cms.images?.heroBg || ""}
+                            onChange={(e) =>
+                              setCms({
+                                ...cms,
+                                images: { ...cms.images, heroBg: e.target.value },
+                              })
+                            }
+                            placeholder="Image URL or upload a file..."
+                            className="flex-1 p-2 text-xs bg-white border border-hotel-stone/40 rounded"
+                          />
+                          <label className="flex items-center gap-1.5 px-3 py-2 bg-hotel-sand hover:bg-hotel-stone/20 text-hotel-charcoal rounded text-xs font-semibold cursor-pointer transition-colors shrink-0">
+                            <Upload className="h-3.5 w-3.5" />
+                            <span>Upload</span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(e) =>
+                                handleFileUpload(e, (dataUrl) =>
+                                  setCms({
+                                    ...cms,
+                                    images: { ...cms.images, heroBg: dataUrl },
+                                  })
+                                )
+                              }
+                            />
+                          </label>
+                        </div>
+                        {cms.images?.heroBg && (
+                          <div className="mt-2 h-20 w-36 rounded overflow-hidden border border-hotel-stone/30">
+                            <img
+                              src={cms.images.heroBg}
+                              alt="Hero Preview"
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* About Hillside Image */}
+                        <div>
+                          <label className="block text-[11px] font-semibold uppercase tracking-wider text-hotel-charcoal mb-1">
+                            About Section: Hillside Image
+                          </label>
+                          <div className="flex gap-2 items-center">
+                            <input
+                              type="text"
+                              value={cms.images?.aboutHillside || ""}
+                              onChange={(e) =>
+                                setCms({
+                                  ...cms,
+                                  images: { ...cms.images, aboutHillside: e.target.value },
+                                })
+                              }
+                              placeholder="Image URL or file..."
+                              className="flex-1 p-2 text-xs bg-white border border-hotel-stone/40 rounded"
+                            />
+                            <label className="flex items-center gap-1 px-2.5 py-2 bg-hotel-sand hover:bg-hotel-stone/20 text-hotel-charcoal rounded text-xs font-semibold cursor-pointer transition-colors shrink-0">
+                              <Upload className="h-3.5 w-3.5" />
+                              <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={(e) =>
+                                  handleFileUpload(e, (dataUrl) =>
+                                    setCms({
+                                      ...cms,
+                                      images: { ...cms.images, aboutHillside: dataUrl },
+                                    })
+                                  )
+                                }
+                              />
+                            </label>
+                          </div>
+                          {cms.images?.aboutHillside && (
+                            <div className="mt-2 h-16 w-24 rounded overflow-hidden border border-hotel-stone/30">
+                              <img
+                                src={cms.images.aboutHillside}
+                                alt="Hillside Preview"
+                                className="h-full w-full object-cover"
+                              />
+                            </div>
+                          )}
+                        </div>
+
+                        {/* About Rooftops Image */}
+                        <div>
+                          <label className="block text-[11px] font-semibold uppercase tracking-wider text-hotel-charcoal mb-1">
+                            About Section: Rooftops Image
+                          </label>
+                          <div className="flex gap-2 items-center">
+                            <input
+                              type="text"
+                              value={cms.images?.aboutRooftops || ""}
+                              onChange={(e) =>
+                                setCms({
+                                  ...cms,
+                                  images: { ...cms.images, aboutRooftops: e.target.value },
+                                })
+                              }
+                              placeholder="Image URL or file..."
+                              className="flex-1 p-2 text-xs bg-white border border-hotel-stone/40 rounded"
+                            />
+                            <label className="flex items-center gap-1 px-2.5 py-2 bg-hotel-sand hover:bg-hotel-stone/20 text-hotel-charcoal rounded text-xs font-semibold cursor-pointer transition-colors shrink-0">
+                              <Upload className="h-3.5 w-3.5" />
+                              <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={(e) =>
+                                  handleFileUpload(e, (dataUrl) =>
+                                    setCms({
+                                      ...cms,
+                                      images: { ...cms.images, aboutRooftops: dataUrl },
+                                    })
+                                  )
+                                }
+                              />
+                            </label>
+                          </div>
+                          {cms.images?.aboutRooftops && (
+                            <div className="mt-2 h-16 w-24 rounded overflow-hidden border border-hotel-stone/30">
+                              <img
+                                src={cms.images.aboutRooftops}
+                                alt="Rooftops Preview"
+                                className="h-full w-full object-cover"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Photo Gallery Manager */}
+                    <div className="bg-white p-4 rounded border border-hotel-stone/30 space-y-4">
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-hotel-gold flex items-center gap-1.5">
+                        <Sparkles className="h-4 w-4" />
+                        Manage Photo Gallery Items ({cms.images?.gallery?.length || 0})
+                      </h3>
+
+                      {/* Add New Gallery Item */}
+                      <div className="p-3 bg-hotel-sand/30 rounded border border-hotel-stone/20 space-y-3">
+                        <p className="text-[11px] font-semibold text-hotel-charcoal uppercase tracking-wider">
+                          Add New Photo to Gallery
+                        </p>
+                        <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center">
+                          <div className="sm:col-span-5 flex gap-1.5">
+                            <input
+                              type="text"
+                              value={newGalleryUrl}
+                              onChange={(e) => setNewGalleryUrl(e.target.value)}
+                              placeholder="Image URL or upload below..."
+                              className="w-full p-2 text-xs bg-white border border-hotel-stone/40 rounded"
+                            />
+                            <label className="px-2.5 py-2 bg-hotel-sand hover:bg-hotel-stone/20 text-hotel-charcoal rounded text-xs cursor-pointer shrink-0 flex items-center justify-center">
+                              <Upload className="h-3.5 w-3.5" />
+                              <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={(e) =>
+                                  handleFileUpload(e, (dataUrl) => setNewGalleryUrl(dataUrl))
+                                }
+                              />
+                            </label>
+                          </div>
+
+                          <input
+                            type="text"
+                            value={newGalleryCaption}
+                            onChange={(e) => setNewGalleryCaption(e.target.value)}
+                            placeholder="Caption (e.g. Traditional suite)"
+                            className="sm:col-span-4 p-2 text-xs bg-white border border-hotel-stone/40 rounded"
+                          />
+
+                          <select
+                            value={newGalleryCategory}
+                            onChange={(e) =>
+                              setNewGalleryCategory(e.target.value as "hotel" | "city")
+                            }
+                            className="sm:col-span-2 p-2 text-xs bg-white border border-hotel-stone/40 rounded"
+                          >
+                            <option value="hotel">Hotel</option>
+                            <option value="city">City Views</option>
+                          </select>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (!newGalleryUrl.trim()) return;
+                              const newItem = {
+                                id: "gal-" + Date.now(),
+                                url: newGalleryUrl,
+                                caption: newGalleryCaption || "Casa Chitic photo",
+                                category: newGalleryCategory,
+                              };
+                              const updatedGallery = [newItem, ...(cms.images?.gallery || [])];
+                              setCms({
+                                ...cms,
+                                images: { ...cms.images, gallery: updatedGallery },
+                              });
+                              setNewGalleryUrl("");
+                              setNewGalleryCaption("");
+                            }}
+                            className="sm:col-span-1 py-2 bg-hotel-charcoal text-hotel-beige rounded hover:bg-hotel-gold hover:text-hotel-charcoal text-xs font-semibold flex items-center justify-center gap-1 transition-all"
+                          >
+                            <Plus className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Current Gallery Grid */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 max-h-72 overflow-y-auto pr-1">
+                        {(cms.images?.gallery || []).map((item, index) => (
+                          <div
+                            key={item.id || index}
+                            className="relative group bg-hotel-sand/20 rounded p-2 border border-hotel-stone/20 flex flex-col gap-1.5"
+                          >
+                            <div className="h-28 w-full rounded overflow-hidden relative bg-black/10">
+                              <img
+                                src={item.url}
+                                alt={item.caption}
+                                className="h-full w-full object-cover"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const filtered = cms.images.gallery.filter(
+                                    (_, i) => i !== index
+                                  );
+                                  setCms({
+                                    ...cms,
+                                    images: { ...cms.images, gallery: filtered },
+                                  });
+                                }}
+                                className="absolute top-1.5 right-1.5 p-1 bg-red-600/80 text-white rounded hover:bg-red-700 transition-colors shadow"
+                                title="Remove Image"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
+                            <input
+                              type="text"
+                              value={item.caption}
+                              onChange={(e) => {
+                                const updated = [...cms.images.gallery];
+                                updated[index] = { ...updated[index], caption: e.target.value };
+                                setCms({
+                                  ...cms,
+                                  images: { ...cms.images, gallery: updated },
+                                });
+                              }}
+                              className="p-1 text-[11px] bg-white border border-hotel-stone/30 rounded"
+                              placeholder="Caption..."
+                            />
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 )}

@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { Language } from "../types";
 import { HERO_SLIDES, CONTACT_INFO } from "../data";
+import { getInitialCMSContent } from "../lib/cmsStore";
 import Logo from "./Logo";
 
 interface HeroCarouselProps {
@@ -28,9 +29,23 @@ export default function HeroCarousel({
   setLang,
   onSeeDetails,
 }: HeroCarouselProps) {
+  const [cms, setCms] = useState(getInitialCMSContent());
   const [currentSlide, setCurrentSlide] = useState(0);
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const handleCmsUpdate = () => {
+      setCms(getInitialCMSContent());
+    };
+    window.addEventListener("casachitic_cms_updated", handleCmsUpdate);
+    return () => window.removeEventListener("casachitic_cms_updated", handleCmsUpdate);
+  }, []);
+
+  const heroBgImage = cms.images?.heroBg || HERO_SLIDES[currentSlide].image;
+  const heroTitleText = cms.heroTitle || HERO_SLIDES[currentSlide].title;
+  const heroSubtitleText = cms.heroSubtitle || HERO_SLIDES[currentSlide].subtitle;
+  const heroDescText = cms.heroDescription || HERO_SLIDES[currentSlide].description;
 
   // Handle scroll trigger for navbar
   useEffect(() => {
@@ -228,7 +243,7 @@ export default function HeroCarousel({
             transition={{ duration: 1.2, ease: "easeInOut" }}
             className="absolute inset-0 h-full w-full bg-cover bg-center"
             style={{
-              backgroundImage: `url(${HERO_SLIDES[currentSlide].image})`,
+              backgroundImage: `url(${heroBgImage})`,
             }}
           >
             {/* Subtle Overlay gradients to enhance text readability */}
@@ -250,7 +265,7 @@ export default function HeroCarousel({
             transition={{ delay: 0.3, duration: 0.8 }}
             className="font-sans text-xs md:text-sm font-medium tracking-[0.3em] text-hotel-gold uppercase mb-4"
           >
-            {HERO_SLIDES[currentSlide].subtitle}
+            {heroSubtitleText}
           </motion.p>
 
           {/* Large Title */}
@@ -260,7 +275,7 @@ export default function HeroCarousel({
             transition={{ delay: 0.5, duration: 0.9 }}
             className="font-serif text-5xl md:text-8xl font-normal tracking-wide text-hotel-beige mb-6 uppercase"
           >
-            {HERO_SLIDES[currentSlide].title}
+            {heroTitleText}
           </motion.h1>
 
           {/* Slide Description */}
@@ -270,7 +285,7 @@ export default function HeroCarousel({
             transition={{ delay: 0.8, duration: 1 }}
             className="mx-auto max-w-xl font-sans text-sm md:text-base font-light text-hotel-beige/80 leading-relaxed tracking-wide mb-10"
           >
-            {HERO_SLIDES[currentSlide].description}
+            {heroDescText}
           </motion.p>
 
           {/* Action Button */}

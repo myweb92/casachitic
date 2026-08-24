@@ -3,22 +3,34 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Maximize2, ChevronLeft, ChevronRight, X, Image, Info } from 'lucide-react';
 import { Language } from '../types';
 import { GALLERY_ITEMS } from '../data';
+import { getInitialCMSContent } from '../lib/cmsStore';
 
 interface PhotoGalleryProps {
   lang: Language;
 }
 
 export default function PhotoGallery({ lang }: PhotoGalleryProps) {
+  const [cms, setCms] = useState(getInitialCMSContent());
   const [activeTab, setActiveTab] = useState<'all' | 'hotel' | 'city'>('all');
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
+  useEffect(() => {
+    const handleCmsUpdate = () => {
+      setCms(getInitialCMSContent());
+    };
+    window.addEventListener("casachitic_cms_updated", handleCmsUpdate);
+    return () => window.removeEventListener("casachitic_cms_updated", handleCmsUpdate);
+  }, []);
+
+  const galleryList = cms.images?.gallery || GALLERY_ITEMS;
+
   // Filter items based on active category tab
-  const filteredItems = GALLERY_ITEMS.filter((item) => {
+  const filteredItems = galleryList.filter((item) => {
     if (activeTab === 'all') return true;
     return item.category === activeTab;
   });

@@ -8,6 +8,7 @@ import { Language } from "./types";
 import HeroCarousel from "./components/HeroCarousel";
 import AboutUs from "./components/AboutUs";
 import RoomTypes from "./components/RoomTypes";
+import PhotoGallery from "./components/PhotoGallery";
 import Experiences from "./components/Experiences";
 import Reviews from "./components/Reviews";
 import ContactLocation from "./components/ContactLocation";
@@ -75,6 +76,9 @@ export default function App() {
 
       {/* 5. Room Grid with custom specs, L'Occitane amenities & reservation panel */}
       <RoomTypes />
+
+      {/* 5.5 Photo Gallery */}
+      <PhotoGallery lang={lang} />
 
       {/* 6. Experiences Section */}
       <Experiences />

@@ -3,17 +3,30 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { MapPin } from 'lucide-react';
 import { Language } from '../types';
 import { ABOUT_TEXT } from '../data';
+import { getInitialCMSContent } from '../lib/cmsStore';
 
 interface AboutUsProps {
   lang: Language;
 }
 
 export default function AboutUs({ lang }: AboutUsProps) {
+  const [cms, setCms] = useState(getInitialCMSContent());
+
+  useEffect(() => {
+    const handleCmsUpdate = () => {
+      setCms(getInitialCMSContent());
+    };
+    window.addEventListener("casachitic_cms_updated", handleCmsUpdate);
+    return () => window.removeEventListener("casachitic_cms_updated", handleCmsUpdate);
+  }, []);
+
+  const hillsideImg = cms.images?.aboutHillside || ABOUT_TEXT.imageHillside;
+  const rooftopsImg = cms.images?.aboutRooftops || ABOUT_TEXT.imageRooftops;
   return (
     <section id="about" className="relative py-24 lg:py-32 bg-hotel-beige overflow-hidden" id-attr="about-section">
       <div className="mx-auto max-w-7xl px-6 lg:px-12">
@@ -34,7 +47,7 @@ export default function AboutUs({ lang }: AboutUsProps) {
               className="relative z-10 aspect-[4/5] md:aspect-[4/3] lg:aspect-[4/5] overflow-hidden rounded-sm shadow-2xl border border-white/50"
             >
               <img
-                src={ABOUT_TEXT.imageHillside}
+                src={hillsideImg}
                 alt="Brașov green hillside view"
                 className="h-full w-full object-cover transition-transform duration-1000 hover:scale-105"
                 loading="lazy"
@@ -52,7 +65,7 @@ export default function AboutUs({ lang }: AboutUsProps) {
               className="absolute -bottom-10 -right-6 md:right-10 lg:-right-10 z-20 w-1/2 md:w-2/5 lg:w-1/2 aspect-square overflow-hidden rounded-sm shadow-2xl border-4 border-hotel-beige"
             >
               <img
-                src={ABOUT_TEXT.imageRooftops}
+                src={rooftopsImg}
                 alt="Misty Transylvanian forest rooftops"
                 className="h-full w-full object-cover transition-transform duration-700 hover:scale-105"
                 loading="lazy"

@@ -5,6 +5,13 @@
 
 import { ABOUT_TEXT, CONTACT_INFO, GALLERY_ITEMS } from "../data";
 
+export interface CMSImageItem {
+  id: string;
+  url: string;
+  caption: string;
+  category: string;
+}
+
 export interface CMSContent {
   termsAndConditions: string;
   privacyPolicy: string;
@@ -27,6 +34,14 @@ export interface CMSContent {
   heroTitle: string;
   heroSubtitle: string;
   heroDescription: string;
+  images: {
+    heroBg: string;
+    aboutHillside: string;
+    aboutRooftops: string;
+    storyVideoBg: string;
+    roomMain: string;
+    gallery: CMSImageItem[];
+  };
   adminPasswordHash: string; // Stored securely in localStorage or memory
 }
 
@@ -98,6 +113,14 @@ export function getInitialCMSContent(): CMSContent {
         heroTitle: parsed.heroTitle || "Casa Chitic",
         heroSubtitle: parsed.heroSubtitle || "Welcome to Casa Chitic Boutique Hotel",
         heroDescription: parsed.heroDescription || "A historic sanctuary combining old-world Transylvanian soul with refined luxury in Brașov.",
+        images: {
+          heroBg: parsed.images?.heroBg || parsed.heroImage || "",
+          aboutHillside: parsed.images?.aboutHillside || ABOUT_TEXT.imageHillside || "",
+          aboutRooftops: parsed.images?.aboutRooftops || ABOUT_TEXT.imageRooftops || "",
+          storyVideoBg: parsed.images?.storyVideoBg || "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=2000&q=80",
+          roomMain: parsed.images?.roomMain || "https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=1200&q=80",
+          gallery: parsed.images?.gallery || GALLERY_ITEMS,
+        },
         adminPasswordHash: parsed.adminPasswordHash || "casachitic2026!",
       };
     }
@@ -127,6 +150,14 @@ export function getInitialCMSContent(): CMSContent {
     heroTitle: "Casa Chitic",
     heroSubtitle: "Welcome to Casa Chitic Boutique Hotel",
     heroDescription: "A historic sanctuary combining old-world Transylvanian soul with refined luxury in Brașov.",
+    images: {
+      heroBg: "",
+      aboutHillside: ABOUT_TEXT.imageHillside,
+      aboutRooftops: ABOUT_TEXT.imageRooftops,
+      storyVideoBg: "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=2000&q=80",
+      roomMain: "https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=1200&q=80",
+      gallery: GALLERY_ITEMS,
+    },
     adminPasswordHash: "casachitic2026!",
   };
 }
