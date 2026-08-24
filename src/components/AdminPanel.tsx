@@ -30,6 +30,7 @@ import {
   verifyAdminPassword,
   getAdminPasswordHash,
   setAdminPassword,
+  resetToDefaultPassword,
   CMSContent,
 } from "../lib/cmsStore";
 
@@ -91,16 +92,26 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
     }
   }, [isOpen]);
 
+  const [resetNotice, setResetNotice] = useState<string | null>(null);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setResetNotice(null);
     const isValid = await verifyAdminPassword(passwordInput);
     if (isValid) {
       setIsAuthenticated(true);
       setLoginError("");
       setPasswordInput("");
     } else {
-      setLoginError("Incorrect password. Please try again.");
+      setLoginError("Incorrect password. Please try again or click Reset below.");
     }
+  };
+
+  const handleQuickReset = async () => {
+    await resetToDefaultPassword();
+    setLoginError("");
+    setResetNotice("Password has been reset to default: casachitic2026!");
+    setPasswordInput("casachitic2026!");
   };
 
   const handleLogout = () => {
@@ -258,6 +269,13 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                     </div>
                   )}
 
+                  {resetNotice && (
+                    <div className="flex items-center gap-2 p-3 rounded bg-emerald-50 text-emerald-800 text-xs border border-emerald-200">
+                      <ShieldCheck className="h-4 w-4 shrink-0 text-emerald-600" />
+                      <span>{resetNotice}</span>
+                    </div>
+                  )}
+
                   <button
                     type="submit"
                     className="w-full py-3 px-4 bg-hotel-charcoal text-hotel-beige rounded font-sans text-xs uppercase tracking-widest font-semibold hover:bg-hotel-gold hover:text-hotel-charcoal transition-all shadow-md mt-2"
@@ -266,10 +284,17 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                   </button>
                 </form>
 
-                <div className="mt-6 pt-4 border-t border-hotel-stone/20 text-center">
+                <div className="mt-6 pt-4 border-t border-hotel-stone/20 text-center space-y-2">
                   <p className="text-[11px] text-hotel-stone">
-                    Default password: <code className="bg-hotel-sand/50 px-1.5 py-0.5 rounded text-hotel-charcoal font-mono">casachitic2026!</code> (Change it anytime in Security settings)
+                    Default password: <code className="bg-hotel-sand/50 px-1.5 py-0.5 rounded text-hotel-charcoal font-mono">casachitic2026!</code>
                   </p>
+                  <button
+                    type="button"
+                    onClick={handleQuickReset}
+                    className="text-[11px] text-hotel-gold hover:underline font-medium"
+                  >
+                    Forgot or lost password? Click to reset to default
+                  </button>
                 </div>
               </div>
             </div>

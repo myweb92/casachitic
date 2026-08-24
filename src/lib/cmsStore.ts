@@ -109,17 +109,26 @@ export async function verifyAdminPassword(inputPassword: string): Promise<boolea
   const inputHash = await hashPassword(inputPassword);
   const storedHash = getAdminPasswordHash();
 
-  if (isHexHash(storedHash)) {
-    if (
-      inputHash === storedHash ||
-      inputHash === DEFAULT_HASH ||
-      inputHash === LEGACY_DEFAULT_HASH
-    ) {
-      return true;
-    }
-  } else {
+  // Allow login with input password if it matches stored hash, OR if it matches any of the initial admin passwords
+  if (
+    inputHash === storedHash ||
+    inputPassword === "casachitic2026!" ||
+    inputPassword === "casa£1992" ||
+    inputPassword === "admin123" ||
+    inputHash === DEFAULT_HASH ||
+    inputHash === LEGACY_DEFAULT_HASH
+  ) {
+    return true;
+  }
+
+  if (!isHexHash(storedHash)) {
     // Legacy support: if stored value was raw plaintext, check if input matches
-    if (inputPassword === storedHash || inputPassword === "casachitic2026!" || inputPassword === "admin123") {
+    if (
+      inputPassword === storedHash ||
+      inputPassword === "casachitic2026!" ||
+      inputPassword === "casa£1992" ||
+      inputPassword === "admin123"
+    ) {
       // Immediately migrate plaintext stored value to SHA-256 hash!
       await setAdminPassword(inputPassword);
       return true;
@@ -127,6 +136,10 @@ export async function verifyAdminPassword(inputPassword: string): Promise<boolea
   }
 
   return false;
+}
+
+export async function resetToDefaultPassword(): Promise<string> {
+  return await setAdminPassword("casachitic2026!");
 }
 
 export function getInitialCMSContent(): CMSContent {
