@@ -98,7 +98,7 @@ export function getInitialCMSContent(): CMSContent {
         heroTitle: parsed.heroTitle || "Casa Chitic",
         heroSubtitle: parsed.heroSubtitle || "Welcome to Casa Chitic Boutique Hotel",
         heroDescription: parsed.heroDescription || "A historic sanctuary combining old-world Transylvanian soul with refined luxury in Brașov.",
-        adminPasswordHash: parsed.adminPasswordHash || "admin123",
+        adminPasswordHash: parsed.adminPasswordHash || "casachitic2026!",
       };
     }
   } catch (e) {
@@ -127,7 +127,7 @@ export function getInitialCMSContent(): CMSContent {
     heroTitle: "Casa Chitic",
     heroSubtitle: "Welcome to Casa Chitic Boutique Hotel",
     heroDescription: "A historic sanctuary combining old-world Transylvanian soul with refined luxury in Brașov.",
-    adminPasswordHash: "admin123",
+    adminPasswordHash: "casachitic2026!",
   };
 }
 
@@ -144,15 +144,26 @@ export function getAdminPassword(): string {
   try {
     const saved = localStorage.getItem(PASSWORD_KEY);
     if (saved) return saved;
+
+    const cmsSaved = localStorage.getItem(STORAGE_KEY);
+    if (cmsSaved) {
+      const parsed = JSON.parse(cmsSaved);
+      if (parsed.adminPasswordHash) return parsed.adminPasswordHash;
+    }
   } catch (e) {
     // fallback
   }
-  return "admin123"; // Default password
+  return "casachitic2026!"; // Default secure password
 }
 
 export function setAdminPassword(newPassword: string) {
   try {
     localStorage.setItem(PASSWORD_KEY, newPassword);
+    const cmsSaved = localStorage.getItem(STORAGE_KEY);
+    const parsed = cmsSaved ? JSON.parse(cmsSaved) : {};
+    parsed.adminPasswordHash = newPassword;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+    window.dispatchEvent(new Event("casachitic_cms_updated"));
   } catch (e) {
     console.error("Failed to update password", e);
   }

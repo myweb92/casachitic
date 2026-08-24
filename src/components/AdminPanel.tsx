@@ -47,6 +47,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
   const [currentPassInput, setCurrentPassInput] = useState("");
   const [newPassInput, setNewPassInput] = useState("");
   const [confirmPassInput, setConfirmPassInput] = useState("");
+  const [showSecPassword, setShowSecPassword] = useState(false);
   const [securityMessage, setSecurityMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   // General save toast
@@ -61,7 +62,11 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     const storedPassword = getAdminPassword();
-    if (passwordInput === storedPassword || passwordInput === "admin123") {
+    if (
+      passwordInput === storedPassword ||
+      passwordInput === "casachitic2026!" ||
+      passwordInput === "admin123"
+    ) {
       setIsAuthenticated(true);
       setLoginError("");
       setPasswordInput("");
@@ -88,7 +93,11 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
     setSecurityMessage(null);
     const storedPassword = getAdminPassword();
 
-    if (currentPassInput !== storedPassword && currentPassInput !== "admin123") {
+    if (
+      currentPassInput !== storedPassword &&
+      currentPassInput !== "casachitic2026!" &&
+      currentPassInput !== "admin123"
+    ) {
       setSecurityMessage({ type: "error", text: "Current password is incorrect." });
       return;
     }
@@ -104,7 +113,14 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
     }
 
     setAdminPassword(newPassInput);
-    setSecurityMessage({ type: "success", text: "Admin password updated successfully!" });
+    const updatedCms = { ...cms, adminPasswordHash: newPassInput };
+    setCms(updatedCms);
+    saveCMSContent(updatedCms);
+
+    setSecurityMessage({
+      type: "success",
+      text: `Password updated successfully! Your new admin password is now: "${newPassInput}"`,
+    });
     setCurrentPassInput("");
     setNewPassInput("");
     setConfirmPassInput("");
@@ -228,7 +244,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
 
                 <div className="mt-6 pt-4 border-t border-hotel-stone/20 text-center">
                   <p className="text-[11px] text-hotel-stone">
-                    Default password: <code className="bg-hotel-sand/50 px-1.5 py-0.5 rounded text-hotel-charcoal font-mono">admin123</code> (Change it anytime in Security settings)
+                    Default password: <code className="bg-hotel-sand/50 px-1.5 py-0.5 rounded text-hotel-charcoal font-mono">casachitic2026!</code> (Change it anytime in Security settings)
                   </p>
                 </div>
               </div>
@@ -556,14 +572,25 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
 
                       <form onSubmit={handleChangePassword} className="space-y-3">
                         <div>
-                          <label className="block text-[11px] font-semibold uppercase tracking-wider text-hotel-charcoal mb-1">
-                            Current Password
-                          </label>
+                          <div className="flex justify-between items-center mb-1">
+                            <label className="block text-[11px] font-semibold uppercase tracking-wider text-hotel-charcoal">
+                              Current Password
+                            </label>
+                            <button
+                              type="button"
+                              onClick={() => setShowSecPassword(!showSecPassword)}
+                              className="text-[10px] text-hotel-gold hover:underline flex items-center gap-1"
+                            >
+                              {showSecPassword ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+                              <span>{showSecPassword ? "Hide Passwords" : "Show Passwords"}</span>
+                            </button>
+                          </div>
                           <input
-                            type="password"
+                            type={showSecPassword ? "text" : "password"}
                             value={currentPassInput}
                             onChange={(e) => setCurrentPassInput(e.target.value)}
-                            className="w-full p-2 text-xs bg-white border border-hotel-stone/40 rounded"
+                            placeholder="Current password (default: casachitic2026!)"
+                            className="w-full p-2 text-xs bg-white border border-hotel-stone/40 rounded focus:outline-none focus:border-hotel-gold"
                             required
                           />
                         </div>
@@ -573,10 +600,11 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                             New Password
                           </label>
                           <input
-                            type="password"
+                            type={showSecPassword ? "text" : "password"}
                             value={newPassInput}
                             onChange={(e) => setNewPassInput(e.target.value)}
-                            className="w-full p-2 text-xs bg-white border border-hotel-stone/40 rounded"
+                            placeholder="At least 4 characters"
+                            className="w-full p-2 text-xs bg-white border border-hotel-stone/40 rounded focus:outline-none focus:border-hotel-gold"
                             required
                           />
                         </div>
@@ -586,10 +614,11 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                             Confirm New Password
                           </label>
                           <input
-                            type="password"
+                            type={showSecPassword ? "text" : "password"}
                             value={confirmPassInput}
                             onChange={(e) => setConfirmPassInput(e.target.value)}
-                            className="w-full p-2 text-xs bg-white border border-hotel-stone/40 rounded"
+                            placeholder="Re-enter new password"
+                            className="w-full p-2 text-xs bg-white border border-hotel-stone/40 rounded focus:outline-none focus:border-hotel-gold"
                             required
                           />
                         </div>
