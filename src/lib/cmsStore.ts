@@ -261,3 +261,27 @@ export async function setAdminPassword(newPassword: string): Promise<string> {
     return DEFAULT_HASH;
   }
 }
+
+// Auto-run legacy plaintext password cleanup on module load
+if (typeof window !== "undefined" && window.localStorage) {
+  try {
+    const rawPass = localStorage.getItem(PASSWORD_KEY);
+    if (rawPass && !isHexHash(rawPass)) {
+      hashPassword(rawPass).then((hash) => {
+        localStorage.setItem(PASSWORD_KEY, hash);
+      });
+    }
+    const cmsRaw = localStorage.getItem(STORAGE_KEY);
+    if (cmsRaw) {
+      const parsed = JSON.parse(cmsRaw);
+      if (parsed.adminPasswordHash && !isHexHash(parsed.adminPasswordHash)) {
+        hashPassword(parsed.adminPasswordHash).then((hash) => {
+          parsed.adminPasswordHash = hash;
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+        });
+      }
+    }
+  } catch (e) {
+    // ignore
+  }
+}
