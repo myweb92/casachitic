@@ -89,9 +89,7 @@ const SALT = "casachitic_secure_salt_2026_v1!";
 
 // Precomputed SHA-256 hashes with SALT
 // "casachitic2026!" => "ca28b0f925008cfbf67e9b466edac8e7620bc2a8b98e826aa7519cf6aa670f59"
-// "admin123" => "fa218c5443216c5b058c49e75c6bf1b0c9ca7df6e355c7058be5f51950b73059"
 export const DEFAULT_HASH = "ca28b0f925008cfbf67e9b466edac8e7620bc2a8b98e826aa7519cf6aa670f59";
-export const LEGACY_DEFAULT_HASH = "fa218c5443216c5b058c49e75c6bf1b0c9ca7df6e355c7058be5f51950b73059";
 
 export async function hashPassword(password: string): Promise<string> {
   const encoder = new TextEncoder();
@@ -109,14 +107,12 @@ export async function verifyAdminPassword(inputPassword: string): Promise<boolea
   const inputHash = await hashPassword(inputPassword);
   const storedHash = getAdminPasswordHash();
 
-  // Allow login with input password if it matches stored hash, OR if it matches any of the initial admin passwords
+  // Allow login with input password if it matches stored hash, OR if it matches any of the valid initial admin passwords
   if (
     inputHash === storedHash ||
     inputPassword === "casachitic2026!" ||
     inputPassword === "casa£1992" ||
-    inputPassword === "admin123" ||
-    inputHash === DEFAULT_HASH ||
-    inputHash === LEGACY_DEFAULT_HASH
+    inputHash === DEFAULT_HASH
   ) {
     return true;
   }
@@ -126,8 +122,7 @@ export async function verifyAdminPassword(inputPassword: string): Promise<boolea
     if (
       inputPassword === storedHash ||
       inputPassword === "casachitic2026!" ||
-      inputPassword === "casa£1992" ||
-      inputPassword === "admin123"
+      inputPassword === "casa£1992"
     ) {
       // Immediately migrate plaintext stored value to SHA-256 hash!
       await setAdminPassword(inputPassword);
