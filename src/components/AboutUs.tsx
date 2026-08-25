@@ -8,13 +8,16 @@ import { motion } from 'motion/react';
 import { MapPin } from 'lucide-react';
 import { Language } from '../types';
 import { ABOUT_TEXT } from '../data';
-import { getInitialCMSContent } from '../lib/cmsStore';
+import { getInitialCMSContent, saveCMSContent } from '../lib/cmsStore';
+import { EditableText } from './EditableText';
+import { EditableImage } from './EditableImage';
 
 interface AboutUsProps {
   lang: Language;
+  isLiveEditMode?: boolean;
 }
 
-export default function AboutUs({ lang }: AboutUsProps) {
+export default function AboutUs({ lang, isLiveEditMode = false }: AboutUsProps) {
   const [cms, setCms] = useState(getInitialCMSContent());
 
   useEffect(() => {
@@ -27,6 +30,61 @@ export default function AboutUs({ lang }: AboutUsProps) {
 
   const hillsideImg = cms.images?.aboutHillside || ABOUT_TEXT.imageHillside;
   const rooftopsImg = cms.images?.aboutRooftops || ABOUT_TEXT.imageRooftops;
+
+  const handleSaveAboutTitle = (newVal: string) => {
+    const copy = {
+      ...cms,
+      aboutText: { ...(cms.aboutText || ABOUT_TEXT), title: newVal },
+    };
+    setCms(copy);
+    saveCMSContent(copy);
+  };
+
+  const handleSaveAboutP1 = (newVal: string) => {
+    const copy = {
+      ...cms,
+      aboutText: { ...(cms.aboutText || ABOUT_TEXT), paragraph1: newVal },
+    };
+    setCms(copy);
+    saveCMSContent(copy);
+  };
+
+  const handleSaveAboutP2 = (newVal: string) => {
+    const copy = {
+      ...cms,
+      aboutText: { ...(cms.aboutText || ABOUT_TEXT), paragraph2: newVal },
+    };
+    setCms(copy);
+    saveCMSContent(copy);
+  };
+
+  const handleSaveAboutTagline = (newVal: string) => {
+    const copy = {
+      ...cms,
+      aboutText: { ...(cms.aboutText || ABOUT_TEXT), tagline: newVal },
+    };
+    setCms(copy);
+    saveCMSContent(copy);
+  };
+
+  const handleSaveHillsideImg = (newUrl: string) => {
+    const copy = {
+      ...cms,
+      images: { ...cms.images, aboutHillside: newUrl },
+    };
+    setCms(copy);
+    saveCMSContent(copy);
+  };
+
+  const handleSaveRooftopsImg = (newUrl: string) => {
+    const copy = {
+      ...cms,
+      images: { ...cms.images, aboutRooftops: newUrl },
+    };
+    setCms(copy);
+    saveCMSContent(copy);
+  };
+
   return (
     <section id="about" className="relative py-24 lg:py-32 bg-hotel-beige overflow-hidden" id-attr="about-section">
       <div className="mx-auto max-w-7xl px-6 lg:px-12">
@@ -46,14 +104,15 @@ export default function AboutUs({ lang }: AboutUsProps) {
               transition={{ duration: 0.8 }}
               className="relative z-10 aspect-[4/5] md:aspect-[4/3] lg:aspect-[4/5] overflow-hidden rounded-sm shadow-2xl border border-white/50"
             >
-              <img
+              <EditableImage
                 src={hillsideImg}
                 alt="Brașov green hillside view"
+                onSave={handleSaveHillsideImg}
+                isLiveEditMode={isLiveEditMode}
                 className="h-full w-full object-cover transition-transform duration-1000 hover:scale-105"
-                loading="lazy"
-                referrerPolicy="no-referrer"
+                containerClassName="h-full w-full"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-hotel-charcoal/20 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-hotel-charcoal/20 to-transparent pointer-events-none" />
             </motion.div>
 
             {/* Overlapping Secondary Rooftops Image */}
@@ -64,12 +123,13 @@ export default function AboutUs({ lang }: AboutUsProps) {
               transition={{ delay: 0.3, duration: 0.8 }}
               className="absolute -bottom-10 -right-6 md:right-10 lg:-right-10 z-20 w-1/2 md:w-2/5 lg:w-1/2 aspect-square overflow-hidden rounded-sm shadow-2xl border-4 border-hotel-beige"
             >
-              <img
+              <EditableImage
                 src={rooftopsImg}
                 alt="Misty Transylvanian forest rooftops"
+                onSave={handleSaveRooftopsImg}
+                isLiveEditMode={isLiveEditMode}
                 className="h-full w-full object-cover transition-transform duration-700 hover:scale-105"
-                loading="lazy"
-                referrerPolicy="no-referrer"
+                containerClassName="h-full w-full"
               />
             </motion.div>
 
@@ -94,26 +154,52 @@ export default function AboutUs({ lang }: AboutUsProps) {
               </span>
 
               {/* Serif Title */}
-              <h2 className="font-serif text-3xl md:text-5xl font-normal text-hotel-charcoal leading-tight tracking-wide mb-6">
-                {ABOUT_TEXT.title}
-              </h2>
+              <div className="mb-6">
+                <EditableText
+                  value={cms.aboutText?.title || ABOUT_TEXT.title}
+                  onSave={handleSaveAboutTitle}
+                  isLiveEditMode={isLiveEditMode}
+                  as="h2"
+                  className="font-serif text-3xl md:text-5xl font-normal text-hotel-charcoal leading-tight tracking-wide"
+                />
+              </div>
 
               {/* Golden divider */}
               <div className="w-16 h-[2px] bg-hotel-gold mb-8" />
 
               {/* Rich Descriptions */}
-              <p className="font-sans text-sm md:text-base font-light text-hotel-stone leading-relaxed mb-6">
-                {ABOUT_TEXT.paragraph1}
-              </p>
-              <p className="font-sans text-sm font-light text-hotel-stone leading-relaxed mb-8">
-                {ABOUT_TEXT.paragraph2}
-              </p>
+              <div className="mb-6">
+                <EditableText
+                  value={cms.aboutText?.paragraph1 || ABOUT_TEXT.paragraph1}
+                  onSave={handleSaveAboutP1}
+                  isLiveEditMode={isLiveEditMode}
+                  multiline
+                  as="p"
+                  className="font-sans text-sm md:text-base font-light text-hotel-stone leading-relaxed"
+                />
+              </div>
+
+              <div className="mb-8">
+                <EditableText
+                  value={cms.aboutText?.paragraph2 || ABOUT_TEXT.paragraph2}
+                  onSave={handleSaveAboutP2}
+                  isLiveEditMode={isLiveEditMode}
+                  multiline
+                  as="p"
+                  className="font-sans text-sm font-light text-hotel-stone leading-relaxed"
+                />
+              </div>
 
               {/* Elegant Tagline */}
               <div className="relative border-l-2 border-hotel-terracotta pl-4 py-1 mb-10">
-                <p className="font-serif italic text-base md:text-lg text-hotel-terracotta-dark leading-relaxed">
-                  {ABOUT_TEXT.tagline}
-                </p>
+                <EditableText
+                  value={cms.aboutText?.tagline || ABOUT_TEXT.tagline}
+                  onSave={handleSaveAboutTagline}
+                  isLiveEditMode={isLiveEditMode}
+                  multiline
+                  as="p"
+                  className="font-serif italic text-base md:text-lg text-hotel-terracotta-dark leading-relaxed"
+                />
               </div>
             </motion.div>
           </div>

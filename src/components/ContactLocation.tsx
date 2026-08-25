@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Mail,
@@ -17,18 +17,59 @@ import {
 } from "lucide-react";
 import { Language } from "../types";
 import { CONTACT_INFO } from "../data";
+import { getInitialCMSContent, saveCMSContent } from "../lib/cmsStore";
+import { EditableText } from "./EditableText";
 
 interface ContactLocationProps {
   lang: Language;
+  isLiveEditMode?: boolean;
 }
 
-export default function ContactLocation({ lang }: ContactLocationProps) {
+export default function ContactLocation({ lang, isLiveEditMode = false }: ContactLocationProps) {
+  const [cms, setCms] = useState(getInitialCMSContent());
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    const handleCmsUpdate = () => {
+      setCms(getInitialCMSContent());
+    };
+    window.addEventListener("casachitic_cms_updated", handleCmsUpdate);
+    return () => window.removeEventListener("casachitic_cms_updated", handleCmsUpdate);
+  }, []);
+
+  const contact = cms.contactInfo || CONTACT_INFO;
+
+  const handleSavePhone = (newVal: string) => {
+    const copy = {
+      ...cms,
+      contactInfo: { ...contact, phone: newVal, phoneFormatted: newVal },
+    };
+    setCms(copy);
+    saveCMSContent(copy);
+  };
+
+  const handleSaveEmail = (newVal: string) => {
+    const copy = {
+      ...cms,
+      contactInfo: { ...contact, email: newVal },
+    };
+    setCms(copy);
+    saveCMSContent(copy);
+  };
+
+  const handleSaveAddress = (newVal: string) => {
+    const copy = {
+      ...cms,
+      contactInfo: { ...contact, address: newVal },
+    };
+    setCms(copy);
+    saveCMSContent(copy);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -93,66 +134,67 @@ export default function ContactLocation({ lang }: ContactLocationProps) {
               id-attr="contact-info-cards-row"
             >
               {/* Address */}
-              <a
-                href="https://www.google.com/maps/place/Hotel+Boutique+Casa+Chitic+-+Str.+Johann+Gott+nr.7/@45.6413547,25.5908935,17z/data=!4m21!1m11!3m10!1s0x40b35b2ea02a0bb5:0x6ef2f837aa20b6b!2sHotel+Boutique+Casa+Chitic+-+Str.+Johann+Gott+nr.7!5m2!4m1!1i2!8m2!3d45.6413665!4d25.5906935!10e5!16s%2Fg%2F11j20fdtxw!3m8!1s0x40b35b2ea02a0bb5:0x6ef2f837aa20b6b!5m2!4m1!1i2!8m2!3d45.6413665!4d25.5906935!16s%2Fg%2F11j20fdtxw?entry=ttu&g_ep=EgoyMDI2MDcyMS4wIKXMDSoASAFQAw%3D%3D"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-5 rounded bg-hotel-cream border border-hotel-sand/35 flex gap-4 text-left shadow-sm hover:border-hotel-gold transition-colors cursor-pointer"
-              >
+              <div className="p-5 rounded bg-hotel-cream border border-hotel-sand/35 flex gap-4 text-left shadow-sm hover:border-hotel-gold transition-colors">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-sm bg-hotel-gold/10 text-hotel-gold">
                   <MapPin className="h-5 w-5" />
                 </div>
-                <div>
+                <div className="w-full">
                   <h4 className="font-sans text-[10px] font-bold tracking-widest text-hotel-gold uppercase mb-1">
                     {"ADDRESS"}
                   </h4>
-                  <p className="font-serif text-sm text-hotel-charcoal leading-snug font-semibold group-hover:text-hotel-terracotta transition-colors">
-                    {CONTACT_INFO.address}
-                  </p>
+                  <EditableText
+                    value={contact.address}
+                    onSave={handleSaveAddress}
+                    isLiveEditMode={isLiveEditMode}
+                    as="p"
+                    className="font-serif text-sm text-hotel-charcoal leading-snug font-semibold"
+                  />
                 </div>
-              </a>
+              </div>
 
               {/* Telephone */}
-              <a
-                href={`tel:${CONTACT_INFO.phone.replace(/\./g, "")}`}
-                className="p-5 rounded bg-hotel-cream border border-hotel-sand/35 flex gap-4 text-left shadow-sm hover:border-hotel-gold transition-colors"
-              >
+              <div className="p-5 rounded bg-hotel-cream border border-hotel-sand/35 flex gap-4 text-left shadow-sm hover:border-hotel-gold transition-colors">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-sm bg-hotel-gold/10 text-hotel-gold">
                   <Phone className="h-5 w-5" />
                 </div>
-                <div>
+                <div className="w-full">
                   <h4 className="font-sans text-[10px] font-bold tracking-widest text-hotel-gold uppercase mb-1">
                     {"PHONE"}
                   </h4>
-                  <p className="font-serif text-sm text-hotel-charcoal leading-snug font-semibold hover:text-hotel-terracotta transition-colors">
-                    {CONTACT_INFO.phoneFormatted}
-                  </p>
+                  <EditableText
+                    value={contact.phoneFormatted || contact.phone}
+                    onSave={handleSavePhone}
+                    isLiveEditMode={isLiveEditMode}
+                    as="p"
+                    className="font-serif text-sm text-hotel-charcoal leading-snug font-semibold"
+                  />
                   <span className="text-[10px] text-hotel-stone/50 font-sans block mt-0.5">
                     {"Click to call directly"}
                   </span>
                 </div>
-              </a>
+              </div>
 
               {/* Email */}
-              <a
-                href={`mailto:${CONTACT_INFO.email}`}
-                className="p-5 rounded bg-hotel-cream border border-hotel-sand/35 flex gap-4 text-left shadow-sm hover:border-hotel-gold transition-colors"
-              >
+              <div className="p-5 rounded bg-hotel-cream border border-hotel-sand/35 flex gap-4 text-left shadow-sm hover:border-hotel-gold transition-colors">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-sm bg-hotel-gold/10 text-hotel-gold">
                   <Mail className="h-5 w-5" />
                 </div>
-                <div>
+                <div className="w-full">
                   <h4 className="font-sans text-[10px] font-bold tracking-widest text-hotel-gold uppercase mb-1">
                     {"EMAIL"}
                   </h4>
-                  <p className="font-serif text-sm text-hotel-charcoal leading-snug font-semibold hover:text-hotel-terracotta transition-colors break-all">
-                    {CONTACT_INFO.email}
-                  </p>
+                  <EditableText
+                    value={contact.email}
+                    onSave={handleSaveEmail}
+                    isLiveEditMode={isLiveEditMode}
+                    as="p"
+                    className="font-serif text-sm text-hotel-charcoal leading-snug font-semibold break-all"
+                  />
                   <span className="text-[10px] text-hotel-stone/50 font-sans block mt-0.5">
                     {"Fast email response"}
                   </span>
                 </div>
-              </a>
+              </div>
 
               {/* Website */}
               <a

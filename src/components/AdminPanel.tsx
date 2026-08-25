@@ -37,10 +37,24 @@ import {
 interface AdminPanelProps {
   isOpen: boolean;
   onClose: () => void;
+  isAuthenticated?: boolean;
+  setIsAuthenticated?: (val: boolean) => void;
+  isLiveEditMode?: boolean;
+  setIsLiveEditMode?: (val: boolean) => void;
 }
 
-export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+export default function AdminPanel({
+  isOpen,
+  onClose,
+  isAuthenticated: externalAuth,
+  setIsAuthenticated: setExternalAuth,
+  isLiveEditMode,
+  setIsLiveEditMode,
+}: AdminPanelProps) {
+  const [internalAuth, setInternalAuth] = useState(false);
+  const isAuthenticated = externalAuth ?? internalAuth;
+  const setIsAuthenticated = setExternalAuth ?? setInternalAuth;
+
   const [passwordInput, setPasswordInput] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState("");
@@ -110,8 +124,8 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
   const handleQuickReset = async () => {
     await resetToDefaultPassword();
     setLoginError("");
-    setResetNotice("Password has been reset to default: casachitic2026!");
-    setPasswordInput("casachitic2026!");
+    setResetNotice("Password has been reset to default successfully.");
+    setPasswordInput("");
   };
 
   const handleLogout = () => {
@@ -198,6 +212,20 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
             </div>
 
             <div className="flex items-center gap-3">
+              {isAuthenticated && setIsLiveEditMode && (
+                <button
+                  onClick={() => setIsLiveEditMode(!isLiveEditMode)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-all ${
+                    isLiveEditMode
+                      ? "bg-hotel-gold text-hotel-charcoal"
+                      : "bg-white/10 text-hotel-beige hover:bg-white/20"
+                  }`}
+                  title="Toggle live on-page editing mode"
+                >
+                  <Sparkles className="h-3.5 w-3.5" />
+                  <span>Live Edit: {isLiveEditMode ? "ON" : "OFF"}</span>
+                </button>
+              )}
               {isAuthenticated && (
                 <button
                   onClick={handleLogout}
@@ -283,19 +311,6 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                     Unlock Admin Portal
                   </button>
                 </form>
-
-                <div className="mt-6 pt-4 border-t border-hotel-stone/20 text-center space-y-2">
-                  <p className="text-[11px] text-hotel-stone">
-                    Default password: <code className="bg-hotel-sand/50 px-1.5 py-0.5 rounded text-hotel-charcoal font-mono">casachitic2026!</code>
-                  </p>
-                  <button
-                    type="button"
-                    onClick={handleQuickReset}
-                    className="text-[11px] text-hotel-gold hover:underline font-medium"
-                  >
-                    Forgot or lost password? Click to reset to default
-                  </button>
-                </div>
               </div>
             </div>
           ) : (
@@ -930,7 +945,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                             type={showSecPassword ? "text" : "password"}
                             value={currentPassInput}
                             onChange={(e) => setCurrentPassInput(e.target.value)}
-                            placeholder="Current password (default: casachitic2026!)"
+                            placeholder="Current password"
                             className="w-full p-2 text-xs bg-white border border-hotel-stone/40 rounded focus:outline-none focus:border-hotel-gold"
                             required
                           />

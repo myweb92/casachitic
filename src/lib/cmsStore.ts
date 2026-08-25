@@ -83,13 +83,12 @@ const DEFAULT_PRIVACY = `Privacy Policy - Casa Chitic Boutique Hotel
 4. Your Rights
 - You have the right to request access, correction, or deletion of your personal data at any time by emailing us at office@casachitic.ro.`;
 
+// Salt for cryptographic hashing
 const STORAGE_KEY = "casachitic_cms_content_v1";
 const PASSWORD_KEY = "casachitic_admin_password_v1";
 const SALT = "casachitic_secure_salt_2026_v1!";
 
-// Precomputed SHA-256 hashes with SALT
-// "casachitic2026!" => "ca28b0f925008cfbf67e9b466edac8e7620bc2a8b98e826aa7519cf6aa670f59"
-export const DEFAULT_HASH = "ca28b0f925008cfbf67e9b466edac8e7620bc2a8b98e826aa7519cf6aa670f59";
+let defaultHashCache: string | null = null;
 
 export async function hashPassword(password: string): Promise<string> {
   const encoder = new TextEncoder();
@@ -99,6 +98,13 @@ export async function hashPassword(password: string): Promise<string> {
   return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
+export async function getDefaultPasswordHash(): Promise<string> {
+  if (!defaultHashCache) {
+    defaultHashCache = await hashPassword("casa£1992");
+  }
+  return defaultHashCache;
+}
+
 function isHexHash(val: string): boolean {
   return typeof val === "string" && val.length === 64 && /^[0-9a-f]{64}$/i.test(val);
 }
@@ -106,35 +112,29 @@ function isHexHash(val: string): boolean {
 export async function verifyAdminPassword(inputPassword: string): Promise<boolean> {
   const inputHash = await hashPassword(inputPassword);
   const storedHash = getAdminPasswordHash();
+  const defaultHash = await getDefaultPasswordHash();
 
-  // Allow login with input password if it matches stored hash, OR if it matches any of the valid initial admin passwords
-  if (
-    inputHash === storedHash ||
-    inputPassword === "casachitic2026!" ||
-    inputPassword === "casa£1992" ||
-    inputHash === DEFAULT_HASH
-  ) {
-    return true;
+  if (!storedHash || storedHash === defaultHash) {
+    return inputHash === defaultHash;
   }
 
-  if (!isHexHash(storedHash)) {
-    // Legacy support: if stored value was raw plaintext, check if input matches
-    if (
-      inputPassword === storedHash ||
-      inputPassword === "casachitic2026!" ||
-      inputPassword === "casa£1992"
-    ) {
-      // Immediately migrate plaintext stored value to SHA-256 hash!
-      await setAdminPassword(inputPassword);
-      return true;
-    }
-  }
-
-  return false;
+  // Check against stored custom SHA-256 hash
+  return inputHash === storedHash;
 }
 
 export async function resetToDefaultPassword(): Promise<string> {
-  return await setAdminPassword("casachitic2026!");
+  const defaultHash = await getDefaultPasswordHash();
+  try {
+    localStorage.setItem(PASSWORD_KEY, defaultHash);
+    const cmsSaved = localStorage.getItem(STORAGE_KEY);
+    const parsed = cmsSaved ? JSON.parse(cmsSaved) : {};
+    parsed.adminPasswordHash = defaultHash;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+    window.dispatchEvent(new Event("casachitic_cms_updated"));
+  } catch (e) {
+    console.error("Failed to reset password", e);
+  }
+  return defaultHash;
 }
 
 export function getInitialCMSContent(): CMSContent {
@@ -144,10 +144,9 @@ export function getInitialCMSContent(): CMSContent {
       const parsed = JSON.parse(saved);
 
       // Clean up legacy plaintext hash if present in parsed CMS
-      let passHash = parsed.adminPasswordHash || DEFAULT_HASH;
+      let passHash = parsed.adminPasswordHash || "";
       if (!isHexHash(passHash)) {
-        // Will be asynchronously converted on verify/set, fallback to default hash for now
-        passHash = DEFAULT_HASH;
+        passHash = "";
       }
 
       return {
@@ -217,13 +216,12 @@ export function getInitialCMSContent(): CMSContent {
       roomMain: "https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=1200&q=80",
       gallery: GALLERY_ITEMS,
     },
-    adminPasswordHash: DEFAULT_HASH,
+    adminPasswordHash: "",
   };
 }
 
 export function saveCMSContent(content: CMSContent) {
   try {
-    // Ensure adminPasswordHash stored in CMS JSON is never plaintext
     const copy = { ...content };
     if (!isHexHash(copy.adminPasswordHash)) {
       copy.adminPasswordHash = getAdminPasswordHash();
@@ -250,7 +248,7 @@ export function getAdminPasswordHash(): string {
   } catch (e) {
     // fallback
   }
-  return DEFAULT_HASH;
+  return "";
 }
 
 export async function setAdminPassword(newPassword: string): Promise<string> {
@@ -266,7 +264,7 @@ export async function setAdminPassword(newPassword: string): Promise<string> {
     return passwordHash;
   } catch (e) {
     console.error("Failed to update password", e);
-    return DEFAULT_HASH;
+    return "";
   }
 }
 

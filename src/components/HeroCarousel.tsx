@@ -15,19 +15,23 @@ import {
 } from "lucide-react";
 import { Language } from "../types";
 import { HERO_SLIDES, CONTACT_INFO } from "../data";
-import { getInitialCMSContent } from "../lib/cmsStore";
+import { getInitialCMSContent, saveCMSContent } from "../lib/cmsStore";
 import Logo from "./Logo";
+import { EditableText } from "./EditableText";
+import { EditableImage } from "./EditableImage";
 
 interface HeroCarouselProps {
   lang: Language;
   setLang: (lang: Language) => void;
   onSeeDetails: () => void;
+  isLiveEditMode?: boolean;
 }
 
 export default function HeroCarousel({
   lang,
   setLang,
   onSeeDetails,
+  isLiveEditMode = false,
 }: HeroCarouselProps) {
   const [cms, setCms] = useState(getInitialCMSContent());
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -42,10 +46,38 @@ export default function HeroCarousel({
     return () => window.removeEventListener("casachitic_cms_updated", handleCmsUpdate);
   }, []);
 
-  const heroBgImage = cms.images?.heroBg || HERO_SLIDES[currentSlide].image;
+  const heroBgImage = cms.images?.heroBg || cms.heroImage || HERO_SLIDES[currentSlide].image;
   const heroTitleText = cms.heroTitle || HERO_SLIDES[currentSlide].title;
   const heroSubtitleText = cms.heroSubtitle || HERO_SLIDES[currentSlide].subtitle;
   const heroDescText = cms.heroDescription || HERO_SLIDES[currentSlide].description;
+
+  const handleSaveHeroSubtitle = (newVal: string) => {
+    const copy = { ...cms, heroSubtitle: newVal };
+    setCms(copy);
+    saveCMSContent(copy);
+  };
+
+  const handleSaveHeroTitle = (newVal: string) => {
+    const copy = { ...cms, heroTitle: newVal };
+    setCms(copy);
+    saveCMSContent(copy);
+  };
+
+  const handleSaveHeroDesc = (newVal: string) => {
+    const copy = { ...cms, heroDescription: newVal };
+    setCms(copy);
+    saveCMSContent(copy);
+  };
+
+  const handleSaveHeroBg = (newUrl: string) => {
+    const copy = {
+      ...cms,
+      heroImage: newUrl,
+      images: { ...cms.images, heroBg: newUrl },
+    };
+    setCms(copy);
+    saveCMSContent(copy);
+  };
 
   // Handle scroll trigger for navbar
   useEffect(() => {
@@ -88,11 +120,11 @@ export default function HeroCarousel({
         id-attr="nav-bar"
         className={`fixed top-0 left-0 z-50 w-full transition-all duration-500 ease-in-out ${
           scrolled
-            ? "bg-hotel-charcoal-light/95 backdrop-blur-md py-4 shadow-xl border-b border-hotel-gold/10"
-            : "bg-gradient-to-b from-black/60 to-transparent py-6"
+            ? "bg-hotel-charcoal-light/95 backdrop-blur-md py-3 sm:py-4 shadow-xl border-b border-hotel-gold/10"
+            : "bg-gradient-to-b from-black/70 via-black/40 to-transparent py-4 sm:py-6"
         }`}
       >
-        <div className="mx-auto flex max-w-[95%] xl:max-w-7xl items-center justify-between">
+        <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-3.5 sm:px-6 lg:px-8">
           {/* Logo */}
           <button
             onClick={() => scrollToSection("home")}
@@ -178,25 +210,31 @@ export default function HeroCarousel({
           </div>
 
           {/* Mobile Nav Elements & Mobile Menu Toggle */}
-          <div className="flex items-center gap-2 sm:gap-4 lg:hidden">
+          <div className="flex items-center gap-2.5 lg:hidden shrink-0">
+            {/* Direct Phone Call Button */}
             <a
               href={`tel:${CONTACT_INFO.phoneFormatted.replace(/\s+/g, '')}`}
-              className="flex items-center gap-1.5 text-hotel-beige hover:text-hotel-gold transition-colors font-sans text-xs sm:text-sm font-normal whitespace-nowrap"
-              aria-label="Phone"
+              className="flex items-center gap-1.5 px-2.5 py-2 bg-hotel-gold/15 hover:bg-hotel-gold border border-hotel-gold/40 text-hotel-gold hover:text-hotel-charcoal rounded-md transition-all font-sans text-xs font-semibold whitespace-nowrap min-h-[44px]"
+              aria-label={`Call ${CONTACT_INFO.phoneFormatted}`}
+              title={`Call ${CONTACT_INFO.phoneFormatted}`}
             >
-              <PhoneCall className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              <span>{CONTACT_INFO.phoneFormatted}</span>
+              <PhoneCall className="w-4 h-4 shrink-0" />
+              <span className="hidden sm:inline-block font-sans text-xs font-semibold tracking-wide">
+                {CONTACT_INFO.phoneFormatted}
+              </span>
             </a>
+
+            {/* Hamburger Toggle Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="rounded-sm p-1.5 text-hotel-beige hover:text-hotel-gold focus:outline-none"
+              className="flex items-center justify-center p-2.5 bg-black/50 hover:bg-black/80 border border-white/20 hover:border-hotel-gold text-hotel-beige hover:text-hotel-gold rounded-md transition-all focus:outline-none focus:ring-2 focus:ring-hotel-gold min-h-[44px] min-w-[44px]"
               aria-label="Toggle menu"
               id-attr="mobile-menu-trigger"
             >
               {mobileMenuOpen ? (
-                <X className="h-6 w-6" />
+                <X className="h-5 w-5 text-hotel-gold" />
               ) : (
-                <Menu className="h-6 w-6" />
+                <Menu className="h-5 w-5 text-hotel-beige" />
               )}
             </button>
           </div>
@@ -211,19 +249,41 @@ export default function HeroCarousel({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-x-0 top-[76px] z-40 bg-hotel-charcoal-light border-b border-hotel-gold/15 p-6 shadow-2xl lg:hidden"
+            className="fixed inset-x-0 top-[68px] sm:top-[76px] z-40 bg-hotel-charcoal-light/98 backdrop-blur-xl border-b border-hotel-gold/20 p-6 shadow-2xl lg:hidden max-h-[calc(100vh-80px)] overflow-y-auto"
             id-attr="mobile-drawer"
           >
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-3">
               {menuItems.map((item, index) => (
                 <button
                   key={index}
                   onClick={() => scrollToSection(item.sectionId)}
-                  className="w-full text-left font-serif text-lg tracking-wide text-hotel-beige py-2 border-b border-hotel-beige/5 hover:text-hotel-gold transition-colors uppercase"
+                  className="w-full text-left font-serif text-lg tracking-wide text-hotel-beige py-2.5 border-b border-hotel-beige/10 hover:text-hotel-gold transition-colors uppercase flex items-center justify-between group"
                 >
-                  {item.label}
+                  <span>{item.label}</span>
+                  <span className="text-hotel-gold opacity-0 group-hover:opacity-100 transition-opacity text-xs font-sans">
+                    →
+                  </span>
                 </button>
               ))}
+
+              <div className="pt-4 flex flex-col gap-3 mt-1">
+                <a
+                  href={`tel:${CONTACT_INFO.phoneFormatted.replace(/\s+/g, '')}`}
+                  className="flex items-center justify-center gap-2 text-hotel-gold font-sans text-xs font-bold tracking-wider py-3 px-4 rounded bg-hotel-gold/10 border border-hotel-gold/30 hover:bg-hotel-gold hover:text-hotel-charcoal transition-colors uppercase"
+                >
+                  <PhoneCall className="w-4 h-4" />
+                  <span>Call {CONTACT_INFO.phoneFormatted}</span>
+                </a>
+
+                <a
+                  href="https://hotels.cloudbeds.com/en/reservation/OYwpJm/?currency=ron"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center bg-hotel-gold text-hotel-charcoal py-3 px-4 font-sans text-xs font-bold tracking-widest uppercase rounded shadow-lg hover:bg-white transition-colors"
+                >
+                  BOOK YOUR STAY
+                </a>
+              </div>
             </div>
           </motion.div>
         )}
@@ -259,34 +319,53 @@ export default function HeroCarousel({
       >
         <div className="max-w-4xl">
           {/* Subtitle */}
-          <motion.p
+          <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.8 }}
-            className="font-sans text-xs md:text-sm font-medium tracking-[0.3em] text-hotel-gold uppercase mb-4"
+            className="mb-4"
           >
-            {heroSubtitleText}
-          </motion.p>
+            <EditableText
+              value={heroSubtitleText}
+              onSave={handleSaveHeroSubtitle}
+              isLiveEditMode={isLiveEditMode}
+              as="p"
+              className="font-sans text-xs md:text-sm font-medium tracking-[0.3em] text-hotel-gold uppercase"
+            />
+          </motion.div>
 
           {/* Large Title */}
-          <motion.h1
+          <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, duration: 0.9 }}
-            className="font-serif text-5xl md:text-8xl font-normal tracking-wide text-hotel-beige mb-6 uppercase"
+            className="mb-6"
           >
-            {heroTitleText}
-          </motion.h1>
+            <EditableText
+              value={heroTitleText}
+              onSave={handleSaveHeroTitle}
+              isLiveEditMode={isLiveEditMode}
+              as="h1"
+              className="font-serif text-5xl md:text-8xl font-normal tracking-wide text-hotel-beige uppercase"
+            />
+          </motion.div>
 
           {/* Slide Description */}
-          <motion.p
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.8, duration: 1 }}
-            className="mx-auto max-w-xl font-sans text-sm md:text-base font-light text-hotel-beige/80 leading-relaxed tracking-wide mb-10"
+            className="mb-10"
           >
-            {heroDescText}
-          </motion.p>
+            <EditableText
+              value={heroDescText}
+              onSave={handleSaveHeroDesc}
+              isLiveEditMode={isLiveEditMode}
+              multiline
+              as="p"
+              className="mx-auto max-w-xl font-sans text-sm md:text-base font-light text-hotel-beige/80 leading-relaxed tracking-wide"
+            />
+          </motion.div>
 
           {/* Action Button */}
           <motion.div

@@ -50,14 +50,15 @@ export default function Footer({ lang, setLang, onOpenAdmin }: FooterProps) {
   }, []);
 
   const handleSecretClick = () => {
-    setClickCount((prev) => {
-      const next = prev + 1;
-      if (next >= 3) {
-        if (onOpenAdmin) onOpenAdmin();
-        return 0;
+    const next = clickCount + 1;
+    if (next >= 3) {
+      setClickCount(0);
+      if (onOpenAdmin) {
+        onOpenAdmin();
       }
-      return next;
-    });
+    } else {
+      setClickCount(next);
+    }
   };
 
   const handleScrollTop = () => {

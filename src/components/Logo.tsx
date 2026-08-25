@@ -21,23 +21,23 @@ export default function Logo({
 }: LogoProps) {
   return (
     <div
-      className={`flex items-center gap-3.5 ${className}`}
+      className={`flex items-center gap-2.5 sm:gap-3.5 ${className}`}
       id-attr="logo-component"
     >
       <img
         src={logoImg}
         alt="Casa Chitic Logo"
-        className="h-11 w-auto shrink-0"
+        className="h-9 sm:h-11 w-auto shrink-0"
       />
       {!iconOnly && (
         <div className="flex flex-col text-left">
           <span
-            className={`font-serif text-2xl font-light tracking-wide leading-tight ${textColorClass}`}
+            className={`font-serif text-lg sm:text-2xl font-light tracking-wide leading-tight ${textColorClass}`}
           >
             Casa Chitic
           </span>
           <span
-            className={`font-sans text-[9px] font-bold tracking-[0.3em] ${iconColorClass} uppercase`}
+            className={`font-sans text-[8px] sm:text-[9px] font-bold tracking-[0.2em] sm:tracking-[0.3em] ${iconColorClass} uppercase whitespace-nowrap`}
           >
             Boutique Hotel • Brașov
           </span>
