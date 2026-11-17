@@ -106,13 +106,19 @@ export default function AdminPanel({
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setResetNotice(null);
-    const isValid = await verifyAdminPassword(passwordInput);
-    if (isValid) {
-      setIsAuthenticated(true);
-      setLoginError("");
-      setPasswordInput("");
-    } else {
-      setLoginError("Incorrect password. Please try again or click Reset below.");
+    setLoginError("");
+    try {
+      const isValid = await verifyAdminPassword(passwordInput);
+      if (isValid) {
+        setIsAuthenticated(true);
+        setLoginError("");
+        setPasswordInput("");
+      } else {
+        setLoginError("Incorrect password. Please check your password and try again.");
+      }
+    } catch (err) {
+      console.error("Admin login error:", err);
+      setLoginError("Unable to verify password in this browser context. Please try again.");
     }
   };
 
@@ -178,7 +184,7 @@ export default function AdminPanel({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[9995] flex items-center justify-center bg-black/85 p-4 sm:p-6 backdrop-blur-md"
+        className="fixed inset-0 z-[2147483640] flex items-center justify-center bg-black/85 p-4 sm:p-6 backdrop-blur-md"
       >
         <div className="absolute inset-0" onClick={onClose} />
 

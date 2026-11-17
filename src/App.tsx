@@ -21,40 +21,56 @@ export default function App() {
   const [isAdminOpen, setIsAdminOpen] = useState(false);
 
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    return (
-      typeof window !== "undefined" &&
-      sessionStorage.getItem("casachitic_admin_auth") === "true"
-    );
+    try {
+      return (
+        typeof window !== "undefined" &&
+        sessionStorage.getItem("casachitic_admin_auth") === "true"
+      );
+    } catch {
+      return false;
+    }
   });
 
   const [isLiveEditMode, setIsLiveEditMode] = useState<boolean>(() => {
-    return (
-      typeof window !== "undefined" &&
-      sessionStorage.getItem("casachitic_live_edit") === "true"
-    );
+    try {
+      return (
+        typeof window !== "undefined" &&
+        sessionStorage.getItem("casachitic_live_edit") === "true"
+      );
+    } catch {
+      return false;
+    }
   });
 
   useEffect(() => {
-    if (isAuthenticated) {
-      sessionStorage.setItem("casachitic_admin_auth", "true");
-    } else {
-      sessionStorage.removeItem("casachitic_admin_auth");
-      sessionStorage.removeItem("casachitic_live_edit");
-      setIsLiveEditMode(false);
+    try {
+      if (isAuthenticated) {
+        sessionStorage.setItem("casachitic_admin_auth", "true");
+      } else {
+        sessionStorage.removeItem("casachitic_admin_auth");
+        sessionStorage.removeItem("casachitic_live_edit");
+        setIsLiveEditMode(false);
+      }
+    } catch {
+      // ignore storage errors
     }
   }, [isAuthenticated]);
 
   useEffect(() => {
-    if (isLiveEditMode) {
-      sessionStorage.setItem("casachitic_live_edit", "true");
-    } else {
-      sessionStorage.removeItem("casachitic_live_edit");
+    try {
+      if (isLiveEditMode) {
+        sessionStorage.setItem("casachitic_live_edit", "true");
+      } else {
+        sessionStorage.removeItem("casachitic_live_edit");
+      }
+    } catch {
+      // ignore storage errors
     }
   }, [isLiveEditMode]);
 
   useEffect(() => {
     const checkAdminRoute = () => {
-      const path = window.location.pathname.toLowerCase();
+      const path = window.location.pathname.toLowerCase().replace(/\/+$/, "");
       const hash = window.location.hash.toLowerCase();
       if (
         path === "/admin" ||
@@ -89,7 +105,7 @@ export default function App() {
 
   const handleOpenAdmin = () => {
     setIsAdminOpen(true);
-    const path = window.location.pathname.toLowerCase();
+    const path = window.location.pathname.toLowerCase().replace(/\/+$/, "");
     if (path !== "/admin" && path !== "/padmin") {
       window.history.pushState(null, "", "/padmin");
     }
@@ -97,7 +113,7 @@ export default function App() {
 
   const handleCloseAdmin = () => {
     setIsAdminOpen(false);
-    const path = window.location.pathname.toLowerCase();
+    const path = window.location.pathname.toLowerCase().replace(/\/+$/, "");
     if (path === "/admin" || path === "/padmin") {
       window.history.pushState(null, "", "/");
     }

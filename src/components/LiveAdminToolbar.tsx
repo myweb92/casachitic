@@ -15,7 +15,7 @@ export const LiveAdminToolbar: React.FC<LiveAdminToolbarProps> = ({
   onLogout,
 }) => {
   return (
-    <div className="fixed top-0 left-0 right-0 z-[9990] bg-hotel-charcoal/95 backdrop-blur-md text-hotel-beige border-b border-hotel-gold/30 px-4 py-2.5 shadow-2xl flex flex-wrap items-center justify-between gap-3 text-xs font-sans">
+    <div className="fixed top-0 left-0 right-0 z-[2147483600] bg-hotel-charcoal/95 backdrop-blur-md text-hotel-beige border-b border-hotel-gold/30 px-4 py-2.5 shadow-2xl flex flex-wrap items-center justify-between gap-3 text-xs font-sans">
       <div className="flex items-center gap-3">
         <span className="flex items-center gap-1.5 font-serif text-sm text-hotel-gold font-normal">
           <Shield className="h-4 w-4 text-hotel-gold" />
