@@ -28,11 +28,11 @@ import {
   getInitialCMSContent,
   saveCMSContent,
   verifyAdminPassword,
-  getAdminPasswordHash,
   setAdminPassword,
   resetToDefaultPassword,
   CMSContent,
 } from "../lib/cmsStore";
+import { processImageFile } from "../lib/imageUtils";
 
 interface AdminPanelProps {
   isOpen: boolean;
@@ -69,24 +69,19 @@ export default function AdminPanel({
   const [newGalleryCaption, setNewGalleryCaption] = useState("");
   const [newGalleryCategory, setNewGalleryCategory] = useState<"hotel" | "city">("hotel");
 
-  // Helper function to handle local image file upload & convert to Data URL
-  const handleFileUpload = (
+  // Helper function to handle local image file upload & optimize Data URL
+  const handleFileUpload = async (
     e: React.ChangeEvent<HTMLInputElement>,
     onSuccess: (dataUrl: string) => void
   ) => {
     const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        alert("File size exceeds 5MB limit. Please choose a smaller image.");
-        return;
-      }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (typeof reader.result === "string") {
-          onSuccess(reader.result);
-        }
-      };
-      reader.readAsDataURL(file);
+    e.target.value = "";
+    if (!file) return;
+    try {
+      const optimized = await processImageFile(file);
+      onSuccess(optimized);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Failed to upload image.");
     }
   };
 
@@ -183,7 +178,7 @@ export default function AdminPanel({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 sm:p-6 backdrop-blur-md"
+        className="fixed inset-0 z-[9995] flex items-center justify-center bg-black/85 p-4 sm:p-6 backdrop-blur-md"
       >
         <div className="absolute inset-0" onClick={onClose} />
 
@@ -905,6 +900,48 @@ export default function AdminPanel({
                               contactInfo: {
                                 ...cms.contactInfo,
                                 instagramUrl: e.target.value,
+                              },
+                            })
+                          }
+                          className="w-full p-2.5 text-xs bg-white border border-hotel-stone/40 rounded"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-semibold uppercase tracking-wider text-hotel-charcoal mb-1">
+                          Website Domain
+                        </label>
+                        <input
+                          type="text"
+                          value={cms.contactInfo.website}
+                          onChange={(e) =>
+                            setCms({
+                              ...cms,
+                              contactInfo: {
+                                ...cms.contactInfo,
+                                website: e.target.value,
+                              },
+                            })
+                          }
+                          className="w-full p-2.5 text-xs bg-white border border-hotel-stone/40 rounded"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold uppercase tracking-wider text-hotel-charcoal mb-1">
+                          Booking Engine URL
+                        </label>
+                        <input
+                          type="text"
+                          value={cms.contactInfo.bookingUrl}
+                          onChange={(e) =>
+                            setCms({
+                              ...cms,
+                              contactInfo: {
+                                ...cms.contactInfo,
+                                bookingUrl: e.target.value,
                               },
                             })
                           }

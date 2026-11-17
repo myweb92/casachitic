@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion } from "motion/react";
 import {
   Mail,
   Phone,
@@ -13,7 +13,6 @@ import {
   Send,
   Check,
   MessageSquare,
-  ExternalLink,
 } from "lucide-react";
 import { Language } from "../types";
 import { CONTACT_INFO } from "../data";
@@ -25,7 +24,10 @@ interface ContactLocationProps {
   isLiveEditMode?: boolean;
 }
 
-export default function ContactLocation({ lang, isLiveEditMode = false }: ContactLocationProps) {
+export default function ContactLocation({
+  lang,
+  isLiveEditMode = false,
+}: ContactLocationProps) {
   const [cms, setCms] = useState(getInitialCMSContent());
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -39,33 +41,33 @@ export default function ContactLocation({ lang, isLiveEditMode = false }: Contac
       setCms(getInitialCMSContent());
     };
     window.addEventListener("casachitic_cms_updated", handleCmsUpdate);
-    return () => window.removeEventListener("casachitic_cms_updated", handleCmsUpdate);
+    return () =>
+      window.removeEventListener("casachitic_cms_updated", handleCmsUpdate);
   }, []);
 
   const contact = cms.contactInfo || CONTACT_INFO;
+  const section = cms.contactSection;
 
-  const handleSavePhone = (newVal: string) => {
-    const copy = {
-      ...cms,
-      contactInfo: { ...contact, phone: newVal, phoneFormatted: newVal },
-    };
+  const updateContactField = (
+    field: "phone" | "email" | "address" | "website",
+    newVal: string
+  ) => {
+    const nextContact =
+      field === "phone"
+        ? { ...contact, phone: newVal, phoneFormatted: newVal }
+        : { ...contact, [field]: newVal };
+    const copy = { ...cms, contactInfo: nextContact };
     setCms(copy);
     saveCMSContent(copy);
   };
 
-  const handleSaveEmail = (newVal: string) => {
+  const updateSectionField = (
+    field: keyof typeof section,
+    newVal: string
+  ) => {
     const copy = {
       ...cms,
-      contactInfo: { ...contact, email: newVal },
-    };
-    setCms(copy);
-    saveCMSContent(copy);
-  };
-
-  const handleSaveAddress = (newVal: string) => {
-    const copy = {
-      ...cms,
-      contactInfo: { ...contact, address: newVal },
+      contactSection: { ...section, [field]: newVal },
     };
     setCms(copy);
     saveCMSContent(copy);
@@ -77,7 +79,6 @@ export default function ContactLocation({ lang, isLiveEditMode = false }: Contac
 
     setIsSending(true);
 
-    // Simulate sending inquiry API proxy
     setTimeout(() => {
       setIsSending(false);
       setSuccess(true);
@@ -100,26 +101,40 @@ export default function ContactLocation({ lang, isLiveEditMode = false }: Contac
       <div className="mx-auto max-w-7xl px-6 lg:px-12 relative z-10">
         {/* Section Header */}
         <div className="text-center max-w-2xl mx-auto mb-16 lg:mb-24">
-          <span className="block font-sans text-xs font-semibold tracking-[0.25em] text-hotel-gold uppercase mb-3">
-            {"LOCATION & RESERVATIONS"}
-          </span>
-          <h2 className="font-serif text-3xl md:text-5xl font-normal text-hotel-charcoal leading-tight tracking-wide mb-4">
-            {"Contact & Location"}
-          </h2>
+          <div className="mb-3">
+            <EditableText
+              value={section.anchor}
+              onSave={(val) => updateSectionField("anchor", val)}
+              isLiveEditMode={isLiveEditMode}
+              as="span"
+              className="block font-sans text-xs font-semibold tracking-[0.25em] text-hotel-gold uppercase"
+            />
+          </div>
+          <div className="mb-4">
+            <EditableText
+              value={section.title}
+              onSave={(val) => updateSectionField("title", val)}
+              isLiveEditMode={isLiveEditMode}
+              as="h2"
+              className="font-serif text-3xl md:text-5xl font-normal text-hotel-charcoal leading-tight tracking-wide"
+            />
+          </div>
           <div className="w-12 h-[2px] bg-hotel-gold mx-auto mb-6" />
-          <p className="font-sans text-xs md:text-sm font-light text-hotel-stone/80 tracking-wide">
-            {
-              "Perfectly centered in old Brașov, ready to accommodate your exceptional Transylvanian journey."
-            }
-          </p>
+          <EditableText
+            value={section.subtitle}
+            onSave={(val) => updateSectionField("subtitle", val)}
+            isLiveEditMode={isLiveEditMode}
+            multiline
+            as="p"
+            className="font-sans text-xs md:text-sm font-light text-hotel-stone/80 tracking-wide"
+          />
         </div>
 
-        {/* Dual Layout: Map + Contact details/Form */}
+        {/* Dual Layout: Contact details/Form */}
         <div
           className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-stretch"
           id-attr="contact-grid"
         >
-          {/* Right Side: Contact Cards + Letter Message Form (lg:col-span-6) */}
           <motion.div
             initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -144,7 +159,7 @@ export default function ContactLocation({ lang, isLiveEditMode = false }: Contac
                   </h4>
                   <EditableText
                     value={contact.address}
-                    onSave={handleSaveAddress}
+                    onSave={(val) => updateContactField("address", val)}
                     isLiveEditMode={isLiveEditMode}
                     as="p"
                     className="font-serif text-sm text-hotel-charcoal leading-snug font-semibold"
@@ -163,7 +178,7 @@ export default function ContactLocation({ lang, isLiveEditMode = false }: Contac
                   </h4>
                   <EditableText
                     value={contact.phoneFormatted || contact.phone}
-                    onSave={handleSavePhone}
+                    onSave={(val) => updateContactField("phone", val)}
                     isLiveEditMode={isLiveEditMode}
                     as="p"
                     className="font-serif text-sm text-hotel-charcoal leading-snug font-semibold"
@@ -185,7 +200,7 @@ export default function ContactLocation({ lang, isLiveEditMode = false }: Contac
                   </h4>
                   <EditableText
                     value={contact.email}
-                    onSave={handleSaveEmail}
+                    onSave={(val) => updateContactField("email", val)}
                     isLiveEditMode={isLiveEditMode}
                     as="p"
                     className="font-serif text-sm text-hotel-charcoal leading-snug font-semibold break-all"
@@ -198,21 +213,30 @@ export default function ContactLocation({ lang, isLiveEditMode = false }: Contac
 
               {/* Website */}
               <a
-                href={`https://${CONTACT_INFO.website}`}
+                href={`https://${(contact.website || CONTACT_INFO.website).replace(/^https?:\/\//, "")}`}
                 target="_blank"
                 rel="noreferrer"
+                onClick={(e) => {
+                  if (isLiveEditMode) e.preventDefault();
+                }}
                 className="p-5 rounded bg-hotel-cream border border-hotel-sand/35 flex gap-4 text-left shadow-sm hover:border-hotel-gold transition-colors"
               >
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-sm bg-hotel-gold/10 text-hotel-gold">
                   <Globe className="h-5 w-5" />
                 </div>
-                <div>
+                <div className="w-full">
                   <h4 className="font-sans text-[10px] font-bold tracking-widest text-hotel-gold uppercase mb-1">
                     {"WEBSITE"}
                   </h4>
-                  <p className="font-serif text-sm text-hotel-charcoal leading-snug font-semibold hover:text-hotel-terracotta transition-colors">
-                    {CONTACT_INFO.website}
-                  </p>
+                  <EditableText
+                    value={contact.website || CONTACT_INFO.website}
+                    onSave={(val) => updateContactField("website", val)}
+                    isLiveEditMode={isLiveEditMode}
+                    useModal
+                    modalLabel="Edit Website Domain"
+                    as="p"
+                    className="font-serif text-sm text-hotel-charcoal leading-snug font-semibold hover:text-hotel-terracotta transition-colors"
+                  />
                   <span className="text-[10px] text-hotel-stone/50 font-sans block mt-0.5">
                     {"Official certified domain"}
                   </span>
@@ -226,8 +250,13 @@ export default function ContactLocation({ lang, isLiveEditMode = false }: Contac
               id-attr="direct-message-form-panel"
             >
               <h3 className="font-serif text-lg text-hotel-charcoal mb-4 flex items-center gap-2">
-                <MessageSquare className="h-4 w-4 text-hotel-gold" />
-                {"Send us a direct message"}
+                <MessageSquare className="h-4 w-4 text-hotel-gold shrink-0" />
+                <EditableText
+                  value={section.formTitle}
+                  onSave={(val) => updateSectionField("formTitle", val)}
+                  isLiveEditMode={isLiveEditMode}
+                  as="span"
+                />
               </h3>
 
               {!success ? (
@@ -237,7 +266,6 @@ export default function ContactLocation({ lang, isLiveEditMode = false }: Contac
                   id-attr="direct-contact-form"
                 >
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Name */}
                     <div>
                       <input
                         type="text"
@@ -248,7 +276,6 @@ export default function ContactLocation({ lang, isLiveEditMode = false }: Contac
                         className="w-full rounded-sm border border-hotel-sand bg-white px-3.5 py-2.5 text-xs text-hotel-charcoal placeholder:text-hotel-stone/40 focus:border-hotel-gold focus:outline-none"
                       />
                     </div>
-                    {/* Email */}
                     <div>
                       <input
                         type="email"
@@ -261,7 +288,6 @@ export default function ContactLocation({ lang, isLiveEditMode = false }: Contac
                     </div>
                   </div>
 
-                  {/* Subject */}
                   <div>
                     <input
                       type="text"
@@ -274,7 +300,6 @@ export default function ContactLocation({ lang, isLiveEditMode = false }: Contac
                     />
                   </div>
 
-                  {/* Message body */}
                   <div>
                     <textarea
                       rows={4}
@@ -286,7 +311,6 @@ export default function ContactLocation({ lang, isLiveEditMode = false }: Contac
                     />
                   </div>
 
-                  {/* Submit buttons */}
                   <button
                     type="submit"
                     disabled={isSending}
@@ -298,13 +322,19 @@ export default function ContactLocation({ lang, isLiveEditMode = false }: Contac
                     ) : (
                       <>
                         <Send className="h-3 w-3 text-hotel-gold" />
-                        <span>{"SEND MESSAGE"}</span>
+                        <EditableText
+                          value={section.sendBtnText}
+                          onSave={(val) => updateSectionField("sendBtnText", val)}
+                          isLiveEditMode={isLiveEditMode}
+                          useModal
+                          modalLabel="Edit Send Button Label"
+                          as="span"
+                        />
                       </>
                     )}
                   </button>
                 </form>
               ) : (
-                /* Success Prompt feedback */
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}

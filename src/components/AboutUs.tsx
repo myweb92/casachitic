@@ -3,14 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
-import { motion } from 'motion/react';
-import { MapPin } from 'lucide-react';
-import { Language } from '../types';
-import { ABOUT_TEXT } from '../data';
-import { getInitialCMSContent, saveCMSContent } from '../lib/cmsStore';
-import { EditableText } from './EditableText';
-import { EditableImage } from './EditableImage';
+import React, { useState, useEffect } from "react";
+import { motion } from "motion/react";
+import { MapPin } from "lucide-react";
+import { Language } from "../types";
+import { ABOUT_TEXT } from "../data";
+import { getInitialCMSContent, saveCMSContent } from "../lib/cmsStore";
+import { EditableText } from "./EditableText";
+import { EditableImage } from "./EditableImage";
 
 interface AboutUsProps {
   lang: Language;
@@ -31,37 +31,13 @@ export default function AboutUs({ lang, isLiveEditMode = false }: AboutUsProps) 
   const hillsideImg = cms.images?.aboutHillside || ABOUT_TEXT.imageHillside;
   const rooftopsImg = cms.images?.aboutRooftops || ABOUT_TEXT.imageRooftops;
 
-  const handleSaveAboutTitle = (newVal: string) => {
+  const updateAboutField = (
+    field: "anchor" | "title" | "paragraph1" | "paragraph2" | "tagline" | "locationBadge",
+    newVal: string
+  ) => {
     const copy = {
       ...cms,
-      aboutText: { ...(cms.aboutText || ABOUT_TEXT), title: newVal },
-    };
-    setCms(copy);
-    saveCMSContent(copy);
-  };
-
-  const handleSaveAboutP1 = (newVal: string) => {
-    const copy = {
-      ...cms,
-      aboutText: { ...(cms.aboutText || ABOUT_TEXT), paragraph1: newVal },
-    };
-    setCms(copy);
-    saveCMSContent(copy);
-  };
-
-  const handleSaveAboutP2 = (newVal: string) => {
-    const copy = {
-      ...cms,
-      aboutText: { ...(cms.aboutText || ABOUT_TEXT), paragraph2: newVal },
-    };
-    setCms(copy);
-    saveCMSContent(copy);
-  };
-
-  const handleSaveAboutTagline = (newVal: string) => {
-    const copy = {
-      ...cms,
-      aboutText: { ...(cms.aboutText || ABOUT_TEXT), tagline: newVal },
+      aboutText: { ...cms.aboutText, [field]: newVal },
     };
     setCms(copy);
     saveCMSContent(copy);
@@ -86,21 +62,24 @@ export default function AboutUs({ lang, isLiveEditMode = false }: AboutUsProps) 
   };
 
   return (
-    <section id="about" className="relative py-24 lg:py-32 bg-hotel-beige overflow-hidden" id-attr="about-section">
+    <section
+      id="about"
+      className="relative py-24 lg:py-32 bg-hotel-beige overflow-hidden"
+      id-attr="about-section"
+    >
       <div className="mx-auto max-w-7xl px-6 lg:px-12">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-24 items-center">
-          
           {/* Left Side: Rich Layered Asymmetric Editorial Imagery */}
           <div className="lg:col-span-6 relative" id-attr="about-images">
             {/* Background design elements */}
             <div className="absolute -top-10 -left-10 w-40 h-40 rounded-full bg-hotel-sand/35 blur-3xl z-0" />
             <div className="absolute -bottom-10 -right-10 w-40 h-40 rounded-full bg-hotel-gold/15 blur-3xl z-0" />
-            
+
             {/* Primary Hillside Image */}
             <motion.div
               initial={{ opacity: 0, x: -50 }}
               whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: '-100px' }}
+              viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.8 }}
               className="relative z-10 aspect-[4/5] md:aspect-[4/3] lg:aspect-[4/5] overflow-hidden rounded-sm shadow-2xl border border-white/50"
             >
@@ -109,6 +88,8 @@ export default function AboutUs({ lang, isLiveEditMode = false }: AboutUsProps) 
                 alt="Brașov green hillside view"
                 onSave={handleSaveHillsideImg}
                 isLiveEditMode={isLiveEditMode}
+                editLabel="Edit Photo 1"
+                badgePosition="bottom-left"
                 className="h-full w-full object-cover transition-transform duration-1000 hover:scale-105"
                 containerClassName="h-full w-full"
               />
@@ -119,7 +100,7 @@ export default function AboutUs({ lang, isLiveEditMode = false }: AboutUsProps) 
             <motion.div
               initial={{ opacity: 0, y: 50, scale: 0.95 }}
               whileInView={{ opacity: 1, y: 0, scale: 1 }}
-              viewport={{ once: true, margin: '-100px' }}
+              viewport={{ once: true, margin: "-100px" }}
               transition={{ delay: 0.3, duration: 0.8 }}
               className="absolute -bottom-10 -right-6 md:right-10 lg:-right-10 z-20 w-1/2 md:w-2/5 lg:w-1/2 aspect-square overflow-hidden rounded-sm shadow-2xl border-4 border-hotel-beige"
             >
@@ -128,6 +109,8 @@ export default function AboutUs({ lang, isLiveEditMode = false }: AboutUsProps) 
                 alt="Misty Transylvanian forest rooftops"
                 onSave={handleSaveRooftopsImg}
                 isLiveEditMode={isLiveEditMode}
+                editLabel="Edit Photo 2"
+                badgePosition="bottom-right"
                 className="h-full w-full object-cover transition-transform duration-700 hover:scale-105"
                 containerClassName="h-full w-full"
               />
@@ -135,29 +118,43 @@ export default function AboutUs({ lang, isLiveEditMode = false }: AboutUsProps) 
 
             {/* Location highlight badge overlay */}
             <div className="absolute top-6 right-6 z-20 flex items-center gap-2 rounded-sm bg-hotel-charcoal-light/90 backdrop-blur-md px-4 py-2 text-xs text-hotel-beige shadow-xl border border-hotel-gold/25">
-              <MapPin className="h-4 w-4 text-hotel-gold" />
-              <span className="font-sans font-medium tracking-wide">Brașov Old Town, Romania</span>
+              <MapPin className="h-4 w-4 text-hotel-gold shrink-0" />
+              <EditableText
+                value={cms.aboutText?.locationBadge || "Brașov Old Town, Romania"}
+                onSave={(val) => updateAboutField("locationBadge", val)}
+                isLiveEditMode={isLiveEditMode}
+                useModal
+                modalLabel="Edit Location Badge"
+                as="span"
+                className="font-sans font-medium tracking-wide"
+              />
             </div>
           </div>
 
-          {/* Right Side: Luxurious Multilingual Copy */}
+          {/* Right Side: Luxurious Copy */}
           <div className="lg:col-span-6" id-attr="about-text-content">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-100px' }}
+              viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.8 }}
             >
               {/* Little Section Anchor */}
-              <span className="block font-sans text-xs font-semibold tracking-[0.25em] text-hotel-gold uppercase mb-3">
-                {'HERITAGE & COMFORT'}
-              </span>
+              <div className="mb-3">
+                <EditableText
+                  value={cms.aboutText?.anchor || "HERITAGE & COMFORT"}
+                  onSave={(val) => updateAboutField("anchor", val)}
+                  isLiveEditMode={isLiveEditMode}
+                  as="span"
+                  className="block font-sans text-xs font-semibold tracking-[0.25em] text-hotel-gold uppercase"
+                />
+              </div>
 
               {/* Serif Title */}
               <div className="mb-6">
                 <EditableText
                   value={cms.aboutText?.title || ABOUT_TEXT.title}
-                  onSave={handleSaveAboutTitle}
+                  onSave={(val) => updateAboutField("title", val)}
                   isLiveEditMode={isLiveEditMode}
                   as="h2"
                   className="font-serif text-3xl md:text-5xl font-normal text-hotel-charcoal leading-tight tracking-wide"
@@ -171,7 +168,7 @@ export default function AboutUs({ lang, isLiveEditMode = false }: AboutUsProps) 
               <div className="mb-6">
                 <EditableText
                   value={cms.aboutText?.paragraph1 || ABOUT_TEXT.paragraph1}
-                  onSave={handleSaveAboutP1}
+                  onSave={(val) => updateAboutField("paragraph1", val)}
                   isLiveEditMode={isLiveEditMode}
                   multiline
                   as="p"
@@ -182,7 +179,7 @@ export default function AboutUs({ lang, isLiveEditMode = false }: AboutUsProps) 
               <div className="mb-8">
                 <EditableText
                   value={cms.aboutText?.paragraph2 || ABOUT_TEXT.paragraph2}
-                  onSave={handleSaveAboutP2}
+                  onSave={(val) => updateAboutField("paragraph2", val)}
                   isLiveEditMode={isLiveEditMode}
                   multiline
                   as="p"
@@ -194,7 +191,7 @@ export default function AboutUs({ lang, isLiveEditMode = false }: AboutUsProps) 
               <div className="relative border-l-2 border-hotel-terracotta pl-4 py-1 mb-10">
                 <EditableText
                   value={cms.aboutText?.tagline || ABOUT_TEXT.tagline}
-                  onSave={handleSaveAboutTagline}
+                  onSave={(val) => updateAboutField("tagline", val)}
                   isLiveEditMode={isLiveEditMode}
                   multiline
                   as="p"
@@ -203,7 +200,6 @@ export default function AboutUs({ lang, isLiveEditMode = false }: AboutUsProps) 
               </div>
             </motion.div>
           </div>
-
         </div>
       </div>
     </section>

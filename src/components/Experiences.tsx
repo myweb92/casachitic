@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import {
   Landmark,
@@ -8,71 +8,112 @@ import {
   Flower,
   Car,
 } from "lucide-react";
+import {
+  getInitialCMSContent,
+  saveCMSContent,
+  ExperienceIconName,
+  CMSExperienceItem,
+} from "../lib/cmsStore";
+import { EditableText } from "./EditableText";
 
-const EXPERIENCES_DATA = [
-  {
-    icon: <Landmark className="w-[18px] h-[18px] text-[#A67C52]" />,
-    badge: "LOCATION",
-    title: "Pedestrian Center",
-    desc: "Located just 100m from the Black Church, perfectly positioned to explore the historic winding streets of Brașov.",
-  },
-  {
-    icon: <ShieldCheck className="w-[18px] h-[18px] text-[#A67C52]" />,
-    badge: "HERITAGE",
-    title: "Solid Wood Furniture",
-    desc: "Each room is uniquely furnished with artisan-crafted pieces that honor traditional Transylvanian woodworking.",
-  },
-  {
-    icon: <Snowflake className="w-[18px] h-[18px] text-[#A67C52]" />,
-    badge: "COMFORT",
-    title: "Air Conditioning",
-    desc: "State-of-the-art, silent climate control systems ensure a restful environment regardless of the season.",
-  },
-  {
-    icon: <Tv className="w-[18px] h-[18px] text-[#A67C52]" />,
-    badge: "ENTERTAINMENT",
-    title: "Smart TV & WiFi",
-    desc: "Stay connected with high-speed internet and premium Smart TVs available in every single room.",
-  },
-  {
-    icon: <Flower className="w-[18px] h-[18px] text-[#A67C52]" />,
-    badge: "COMING AUG 2027",
-    title: "Luxury SPA Center",
-    desc: "A sanctuary for body and mind. Currently undergoing restoration, our high-end wellness SPA will open in late summer 2027.",
-  },
-  {
-    icon: <Car className="w-[18px] h-[18px] text-[#A67C52]" />,
-    badge: "CONVENIENCE",
-    title: "Private Parking",
-    desc: "Convenient, secure parking is available on-site for guests arriving by vehicle (reservation mandatory, daily surcharge applies, limited spots).",
-  },
-];
+interface ExperiencesProps {
+  isLiveEditMode?: boolean;
+}
 
-export default function Experiences() {
+const renderIcon = (iconName: ExperienceIconName) => {
+  const cls = "w-[18px] h-[18px] text-[#A67C52]";
+  switch (iconName) {
+    case "Landmark":
+      return <Landmark className={cls} />;
+    case "ShieldCheck":
+      return <ShieldCheck className={cls} />;
+    case "Snowflake":
+      return <Snowflake className={cls} />;
+    case "Tv":
+      return <Tv className={cls} />;
+    case "Flower":
+      return <Flower className={cls} />;
+    case "Car":
+      return <Car className={cls} />;
+    default:
+      return <Landmark className={cls} />;
+  }
+};
+
+export default function Experiences({ isLiveEditMode = false }: ExperiencesProps) {
+  const [cms, setCms] = useState(getInitialCMSContent());
+
+  useEffect(() => {
+    const handleCmsUpdate = () => setCms(getInitialCMSContent());
+    window.addEventListener("casachitic_cms_updated", handleCmsUpdate);
+    return () => window.removeEventListener("casachitic_cms_updated", handleCmsUpdate);
+  }, []);
+
+  const section = cms.experiencesSection;
+  const experiences = cms.experiences || [];
+
+  const updateSection = (field: "anchor" | "title" | "subtitle", val: string) => {
+    const copy = {
+      ...cms,
+      experiencesSection: { ...section, [field]: val },
+    };
+    setCms(copy);
+    saveCMSContent(copy);
+  };
+
+  const updateExperience = (
+    idx: number,
+    field: keyof CMSExperienceItem,
+    val: string
+  ) => {
+    const next = [...experiences];
+    next[idx] = { ...next[idx], [field]: val };
+    const copy = { ...cms, experiences: next };
+    setCms(copy);
+    saveCMSContent(copy);
+  };
+
   return (
     <section id="experiences" className="bg-[#F5F2ED] py-20 md:py-28">
       <div className="max-w-7xl mx-auto px-6 lg:px-12">
         {/* Section Header */}
         <div className="text-center mb-16 flex flex-col items-center">
-          <span className="font-sans text-[10px] font-bold uppercase tracking-[0.35em] text-[#A67C52] mb-3">
-            Boutique Services
-          </span>
-          <h2 className="font-serif text-3xl md:text-4xl font-medium tracking-tight text-[#1A1A1A] mb-5">
-            Curated Guest Experiences
-          </h2>
+          <div className="mb-3">
+            <EditableText
+              value={section.anchor}
+              onSave={(val) => updateSection("anchor", val)}
+              isLiveEditMode={isLiveEditMode}
+              as="span"
+              className="font-sans text-[10px] font-bold uppercase tracking-[0.35em] text-[#A67C52]"
+            />
+          </div>
+          <div className="mb-5">
+            <EditableText
+              value={section.title}
+              onSave={(val) => updateSection("title", val)}
+              isLiveEditMode={isLiveEditMode}
+              as="h2"
+              className="font-serif text-3xl md:text-4xl font-medium tracking-tight text-[#1A1A1A]"
+            />
+          </div>
           <div className="w-12 h-[1px] bg-[#A67C52] mx-auto mb-5" />
-          <p className="font-sans text-xs text-neutral-500 max-w-lg mx-auto leading-relaxed">
-            Every detail at Casa Chitic is designed to provide you with a
-            seamless and luxurious stay. Discover the tailored amenities that
-            await you.
-          </p>
+          <div className="max-w-lg mx-auto">
+            <EditableText
+              value={section.subtitle}
+              onSave={(val) => updateSection("subtitle", val)}
+              isLiveEditMode={isLiveEditMode}
+              multiline
+              as="p"
+              className="font-sans text-xs text-neutral-500 leading-relaxed"
+            />
+          </div>
         </div>
 
         {/* Experience Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {EXPERIENCES_DATA.map((exp, idx) => (
+          {experiences.map((exp, idx) => (
             <motion.div
-              key={idx}
+              key={exp.id || idx}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-50px" }}
@@ -81,18 +122,36 @@ export default function Experiences() {
             >
               <div className="flex items-start justify-between mb-4">
                 <div className="w-10 h-10 rounded-full border border-[#A67C52] flex items-center justify-center shrink-0">
-                  {exp.icon}
+                  {renderIcon(exp.iconName)}
                 </div>
                 <span className="font-sans text-[8px] font-bold uppercase tracking-widest px-2.5 py-0.5 bg-[#EBE7E0] border border-[#DED9D2] rounded text-neutral-600">
-                  {exp.badge}
+                  <EditableText
+                    value={exp.badge}
+                    onSave={(val) => updateExperience(idx, "badge", val)}
+                    isLiveEditMode={isLiveEditMode}
+                    useModal
+                    modalLabel="Edit Experience Badge"
+                    as="span"
+                  />
                 </span>
               </div>
-              <h3 className="font-serif text-base md:text-lg font-medium text-[#1A1A1A] mt-2 mb-2">
-                {exp.title}
-              </h3>
-              <p className="font-sans text-xs leading-relaxed text-neutral-600">
-                {exp.desc}
-              </p>
+              <div className="mt-2 mb-2">
+                <EditableText
+                  value={exp.title}
+                  onSave={(val) => updateExperience(idx, "title", val)}
+                  isLiveEditMode={isLiveEditMode}
+                  as="h3"
+                  className="font-serif text-base md:text-lg font-medium text-[#1A1A1A]"
+                />
+              </div>
+              <EditableText
+                value={exp.desc}
+                onSave={(val) => updateExperience(idx, "desc", val)}
+                isLiveEditMode={isLiveEditMode}
+                multiline
+                as="p"
+                className="font-sans text-xs leading-relaxed text-neutral-600"
+              />
 
               {/* Hover Animation (Bottom Line) */}
               <div className="absolute bottom-0 left-0 h-[1px] w-1/3 bg-[#DED9D2] transition-all duration-500 group-hover:w-full group-hover:bg-[#A67C52]/50" />

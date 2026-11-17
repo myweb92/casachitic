@@ -22,7 +22,9 @@ export const LiveAdminToolbar: React.FC<LiveAdminToolbarProps> = ({
           Casa Chitic Admin Session
         </span>
         <span className="hidden sm:inline-block text-[11px] text-hotel-sand/70 border-l border-white/20 pl-3">
-          On-Page Live Website Editor
+          {isLiveEditMode
+            ? "Click any highlighted text or image on the page to edit"
+            : "On-Page Live Website Editor"}
         </span>
       </div>
 

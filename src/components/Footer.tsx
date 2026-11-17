@@ -9,12 +9,18 @@ import { motion, AnimatePresence } from "motion/react";
 import { Language } from "../types";
 import { CONTACT_INFO } from "../data";
 import Logo from "./Logo";
-import { getInitialCMSContent, CMSContent } from "../lib/cmsStore";
+import {
+  getInitialCMSContent,
+  saveCMSContent,
+  CMSContent,
+} from "../lib/cmsStore";
+import { EditableText } from "./EditableText";
 
 interface FooterProps {
   lang: Language;
   setLang: (lang: Language) => void;
   onOpenAdmin?: () => void;
+  isLiveEditMode?: boolean;
 }
 
 const WhatsAppIcon = ({ className }: { className?: string }) => (
@@ -33,10 +39,15 @@ const WhatsAppIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-export default function Footer({ lang, setLang, onOpenAdmin }: FooterProps) {
+export default function Footer({
+  lang,
+  setLang,
+  onOpenAdmin,
+  isLiveEditMode = false,
+}: FooterProps) {
   const currentYear = new Date().getFullYear();
   const [activeModal, setActiveModal] = useState<"terms" | "privacy" | null>(
-    null,
+    null
   );
   const [cms, setCms] = useState<CMSContent>(getInitialCMSContent());
   const [clickCount, setClickCount] = useState(0);
@@ -46,7 +57,8 @@ export default function Footer({ lang, setLang, onOpenAdmin }: FooterProps) {
       setCms(getInitialCMSContent());
     };
     window.addEventListener("casachitic_cms_updated", handleUpdate);
-    return () => window.removeEventListener("casachitic_cms_updated", handleUpdate);
+    return () =>
+      window.removeEventListener("casachitic_cms_updated", handleUpdate);
   }, []);
 
   const handleSecretClick = () => {
@@ -65,20 +77,35 @@ export default function Footer({ lang, setLang, onOpenAdmin }: FooterProps) {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const updateFooterField = (
+    field: "description" | "connectTitle" | "backToTopText",
+    newVal: string
+  ) => {
+    const copy = {
+      ...cms,
+      footerSection: { ...cms.footerSection, [field]: newVal },
+    };
+    setCms(copy);
+    saveCMSContent(copy);
+  };
+
+  const contact = cms.contactInfo || CONTACT_INFO;
+  const phoneClean = (contact.phoneFormatted || contact.phone || CONTACT_INFO.phoneFormatted).replace(/\D/g, "");
+
   const socialIcons = [
     {
       icon: <Facebook className="h-4 w-4" />,
-      href: CONTACT_INFO.facebookUrl,
+      href: contact.facebookUrl || CONTACT_INFO.facebookUrl,
       label: "Facebook",
     },
     {
       icon: <Instagram className="h-4 w-4" />,
-      href: CONTACT_INFO.instagramUrl,
+      href: contact.instagramUrl || CONTACT_INFO.instagramUrl,
       label: "Instagram",
     },
     {
       icon: <WhatsAppIcon className="h-4 w-4" />,
-      href: `https://wa.me/${CONTACT_INFO.phoneFormatted.replace(/\D/g, '')}`,
+      href: `https://wa.me/${phoneClean}`,
       label: "WhatsApp",
     },
   ];
@@ -97,20 +124,30 @@ export default function Footer({ lang, setLang, onOpenAdmin }: FooterProps) {
                 <Logo
                   textColorClass="text-hotel-beige"
                   iconColorClass="text-hotel-gold"
+                  isLiveEditMode={isLiveEditMode}
                 />
               </div>
-              <p className="font-sans text-xs text-hotel-beige/50 tracking-wider mt-4 max-w-sm leading-relaxed">
-                {
-                  "An exclusive boutique haven where authentic Transylvanian hospitality meets preserved historical elegance."
-                }
-              </p>
+              <div className="mt-4 max-w-sm">
+                <EditableText
+                  value={cms.footerSection.description}
+                  onSave={(val) => updateFooterField("description", val)}
+                  isLiveEditMode={isLiveEditMode}
+                  multiline
+                  as="p"
+                  className="font-sans text-xs text-hotel-beige/50 tracking-wider leading-relaxed"
+                />
+              </div>
             </div>
 
             {/* Social Icons Column */}
             <div className="flex flex-col items-center gap-3">
-              <span className="font-sans text-[10px] tracking-[0.25em] text-hotel-gold uppercase font-bold">
-                {"CONNECT WITH US"}
-              </span>
+              <EditableText
+                value={cms.footerSection.connectTitle}
+                onSave={(val) => updateFooterField("connectTitle", val)}
+                isLiveEditMode={isLiveEditMode}
+                as="span"
+                className="font-sans text-[10px] tracking-[0.25em] text-hotel-gold uppercase font-bold"
+              />
               <div className="flex gap-3">
                 {socialIcons.map((soc, idx) => (
                   <a
@@ -130,11 +167,20 @@ export default function Footer({ lang, setLang, onOpenAdmin }: FooterProps) {
             {/* Action Column: Back to top */}
             <div className="flex flex-col items-center md:items-end gap-3">
               <button
-                onClick={handleScrollTop}
+                onClick={() => {
+                  if (!isLiveEditMode) handleScrollTop();
+                }}
                 className="flex items-center gap-2 rounded-sm border border-hotel-gold/25 bg-hotel-charcoal-light/50 px-4 py-2 text-xs text-hotel-beige hover:bg-hotel-gold hover:text-hotel-charcoal transition-all shadow-md group uppercase font-semibold tracking-wider"
                 id-attr="back-to-top-btn"
               >
-                <span>{"BACK TO TOP"}</span>
+                <EditableText
+                  value={cms.footerSection.backToTopText}
+                  onSave={(val) => updateFooterField("backToTopText", val)}
+                  isLiveEditMode={isLiveEditMode}
+                  useModal
+                  modalLabel="Edit Back to Top Button"
+                  as="span"
+                />
                 <ArrowUp className="h-3.5 w-3.5 transition-transform group-hover:-translate-y-0.5" />
               </button>
             </div>
@@ -149,7 +195,7 @@ export default function Footer({ lang, setLang, onOpenAdmin }: FooterProps) {
               title="Casa Chitic"
             >
               <p className="font-sans text-[11px] text-hotel-beige/40 tracking-wider">
-                &copy; {currentYear} Casa Chitic Boutique Hotel • {cms.contactInfo.address}
+                &copy; {currentYear} {cms.brand?.title || "Casa Chitic"} Boutique Hotel • {cms.contactInfo.address}
               </p>
               <p className="font-sans text-[9px] text-hotel-beige/30 tracking-widest uppercase mt-1">
                 {"System developed by Niran Sudharaka"}

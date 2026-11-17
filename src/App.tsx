@@ -17,7 +17,7 @@ import { LiveAdminToolbar } from "./components/LiveAdminToolbar";
 
 export default function App() {
   const [lang, setLang] = useState<Language>("en"); // Default to English
-  const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
+  const [, setSelectedRoomId] = useState<string | null>(null);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
 
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
@@ -89,14 +89,16 @@ export default function App() {
 
   const handleOpenAdmin = () => {
     setIsAdminOpen(true);
-    if (window.location.pathname.toLowerCase() !== "/admin") {
-      window.history.pushState(null, "", "/admin");
+    const path = window.location.pathname.toLowerCase();
+    if (path !== "/admin" && path !== "/padmin") {
+      window.history.pushState(null, "", "/padmin");
     }
   };
 
   const handleCloseAdmin = () => {
     setIsAdminOpen(false);
-    if (window.location.pathname.toLowerCase() === "/admin") {
+    const path = window.location.pathname.toLowerCase();
+    if (path === "/admin" || path === "/padmin") {
       window.history.pushState(null, "", "/");
     }
   };
@@ -108,12 +110,10 @@ export default function App() {
   };
 
   const handleHeroSeeDetails = () => {
-    // Scroll to rooms section
     const element = document.getElementById("rooms");
     if (element) {
       element.scrollIntoView({ behavior: "smooth", block: "start" });
     }
-    // Auto trigger Room details modal
     setSelectedRoomId("series");
   };
 
@@ -140,27 +140,33 @@ export default function App() {
         setLang={setLang}
         onSeeDetails={handleHeroSeeDetails}
         isLiveEditMode={isLiveEditMode}
+        isAdminAuthenticated={isAuthenticated}
       />
 
       {/* 2. Historic About Us section with asymmetric layered imagery */}
       <AboutUs lang={lang} isLiveEditMode={isLiveEditMode} />
 
-      {/* 5. Room Grid with custom specs, L'Occitane amenities & reservation panel */}
-      <RoomTypes />
+      {/* 3. Room Grid with specs & inline image/text editing */}
+      <RoomTypes isLiveEditMode={isLiveEditMode} />
 
-      {/* 6. Experiences Section */}
-      <Experiences />
+      {/* 4. Experiences Section */}
+      <Experiences isLiveEditMode={isLiveEditMode} />
 
-      {/* 6.5 Reviews Section */}
-      <Reviews />
+      {/* 5. Reviews Section */}
+      <Reviews isLiveEditMode={isLiveEditMode} />
 
-      {/* 8. Contact details cards, message inbox form & customized Google Maps */}
+      {/* 6. Contact details cards & direct message form */}
       <ContactLocation lang={lang} isLiveEditMode={isLiveEditMode} />
 
-      {/* 9. Minimal heritage dark footer with social loops and logo */}
-      <Footer lang={lang} setLang={setLang} onOpenAdmin={handleOpenAdmin} />
+      {/* 7. Minimal heritage dark footer */}
+      <Footer
+        lang={lang}
+        setLang={setLang}
+        onOpenAdmin={handleOpenAdmin}
+        isLiveEditMode={isLiveEditMode}
+      />
 
-      {/* 10. Password Protected Admin Portal */}
+      {/* 8. Password Protected Admin Portal */}
       <AdminPanel
         isOpen={isAdminOpen}
         onClose={handleCloseAdmin}
@@ -172,4 +178,3 @@ export default function App() {
     </div>
   );
 }
-
