@@ -22,14 +22,23 @@ import {
   Upload,
   Plus,
   Trash2,
+  History,
+  User,
+  Download,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   getInitialCMSContent,
   saveCMSContent,
   verifyAdminPassword,
+  verifyAdminCredentials,
   setAdminPassword,
   resetToDefaultPassword,
+  ADMIN_USERNAME,
+  getAdminLoginLogs,
+  recordAdminLoginLog,
+  detectDeviceSummary,
+  AdminLoginLogEntry,
   CMSContent,
 } from "../lib/cmsStore";
 import { processImageFile } from "../lib/imageUtils";
@@ -55,14 +64,19 @@ export default function AdminPanel({
   const isAuthenticated = externalAuth ?? internalAuth;
   const setIsAuthenticated = setExternalAuth ?? setInternalAuth;
 
+  const [usernameInput, setUsernameInput] = useState("");
   const [passwordInput, setPasswordInput] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState("");
 
   const [activeTab, setActiveTab] = useState<
-    "legal" | "about" | "images" | "contact" | "security"
+    "legal" | "about" | "images" | "contact" | "security" | "logs"
   >("legal");
   const [cms, setCms] = useState<CMSContent>(getInitialCMSContent());
+  const [loginLogs, setLoginLogs] = useState<AdminLoginLogEntry[]>(() =>
+    getAdminLoginLogs()
+  );
+  const [logFilter, setLogFilter] = useState<"all" | "success" | "failed" | "logout">("all");
 
   // New Gallery Item state
   const [newGalleryUrl, setNewGalleryUrl] = useState("");
@@ -98,8 +112,18 @@ export default function AdminPanel({
   useEffect(() => {
     if (isOpen) {
       setCms(getInitialCMSContent());
+      setLoginLogs(getAdminLoginLogs());
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    const handleLogsUpdated = () => {
+      setLoginLogs(getAdminLoginLogs());
+    };
+    window.addEventListener("casachitic_login_logs_updated", handleLogsUpdated);
+    return () =>
+      window.removeEventListener("casachitic_login_logs_updated", handleLogsUpdated);
+  }, []);
 
   const [resetNotice, setResetNotice] = useState<string | null>(null);
 
@@ -107,18 +131,43 @@ export default function AdminPanel({
     e.preventDefault();
     setResetNotice(null);
     setLoginError("");
+    const attemptedUser = usernameInput.trim();
+    const currentRoute = window.location.pathname || "/cpanel";
+    const currentDevice = detectDeviceSummary();
+
     try {
-      const isValid = await verifyAdminPassword(passwordInput);
+      const isValid = await verifyAdminCredentials(attemptedUser, passwordInput);
       if (isValid) {
+        const normalizedUser = attemptedUser.toLowerCase();
+        try {
+          sessionStorage.setItem("casachitic_admin_user", normalizedUser);
+        } catch {
+          // ignore storage errors
+        }
+        recordAdminLoginLog({
+          username: normalizedUser,
+          status: "success",
+          route: currentRoute,
+          device: currentDevice,
+        });
         setIsAuthenticated(true);
         setLoginError("");
+        setUsernameInput("");
         setPasswordInput("");
       } else {
-        setLoginError("Incorrect password. Please check your password and try again.");
+        recordAdminLoginLog({
+          username: attemptedUser || "(empty)",
+          status: "failed",
+          route: currentRoute,
+          device: currentDevice,
+        });
+        setLoginError(
+          "Invalid username or password. Please check your credentials and try again."
+        );
       }
     } catch (err) {
       console.error("Admin login error:", err);
-      setLoginError("Unable to verify password in this browser context. Please try again.");
+      setLoginError("Unable to verify credentials in this browser context. Please try again.");
     }
   };
 
@@ -130,6 +179,19 @@ export default function AdminPanel({
   };
 
   const handleLogout = () => {
+    let activeUser = ADMIN_USERNAME;
+    try {
+      activeUser = sessionStorage.getItem("casachitic_admin_user") || ADMIN_USERNAME;
+      sessionStorage.removeItem("casachitic_admin_user");
+    } catch {
+      // ignore
+    }
+    recordAdminLoginLog({
+      username: activeUser,
+      status: "logout",
+      route: window.location.pathname || "/cpanel",
+      device: detectDeviceSummary(),
+    });
     setIsAuthenticated(false);
     setPasswordInput("");
   };
@@ -259,11 +321,30 @@ export default function AdminPanel({
                     Hotel Owner Access
                   </h3>
                   <p className="font-sans text-xs text-hotel-stone mt-1">
-                    Enter your admin password to manage site content.
+                    Enter your admin username and password to manage site content.
                   </p>
                 </div>
 
                 <form onSubmit={handleLogin} className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-hotel-charcoal mb-1.5">
+                      Username
+                    </label>
+                    <div className="relative">
+                      <User className="h-4 w-4 text-hotel-stone absolute left-3 top-1/2 -translate-y-1/2" />
+                      <input
+                        type="text"
+                        value={usernameInput}
+                        onChange={(e) => setUsernameInput(e.target.value)}
+                        placeholder="Enter username..."
+                        autoComplete="username"
+                        className="w-full pl-9 pr-4 py-2.5 text-sm rounded border border-hotel-stone/40 focus:outline-none focus:border-hotel-gold focus:ring-1 focus:ring-hotel-gold transition-all"
+                        autoFocus
+                        required
+                      />
+                    </div>
+                  </div>
+
                   <div>
                     <label className="block text-xs font-semibold uppercase tracking-wider text-hotel-charcoal mb-1.5">
                       Admin Password
@@ -274,8 +355,9 @@ export default function AdminPanel({
                         value={passwordInput}
                         onChange={(e) => setPasswordInput(e.target.value)}
                         placeholder="Enter password..."
+                        autoComplete="current-password"
                         className="w-full px-4 py-2.5 pr-10 text-sm rounded border border-hotel-stone/40 focus:outline-none focus:border-hotel-gold focus:ring-1 focus:ring-hotel-gold transition-all"
-                        autoFocus
+                        required
                       />
                       <button
                         type="button"
@@ -377,6 +459,18 @@ export default function AdminPanel({
                 >
                   <KeyRound className="h-4 w-4" />
                   <span>Security & Password</span>
+                </button>
+
+                <button
+                  onClick={() => setActiveTab("logs")}
+                  className={`flex items-center gap-2 py-3.5 px-4 font-sans text-xs font-semibold tracking-wider uppercase border-b-2 transition-all whitespace-nowrap ${
+                    activeTab === "logs"
+                      ? "border-hotel-gold text-hotel-charcoal bg-white/60"
+                      : "border-transparent text-hotel-stone hover:text-hotel-charcoal"
+                  }`}
+                >
+                  <History className="h-4 w-4" />
+                  <span>Login Logs ({loginLogs.length})</span>
                 </button>
               </div>
 
@@ -1046,6 +1140,160 @@ export default function AdminPanel({
                           Update Password
                         </button>
                       </form>
+                    </div>
+                  </div>
+                )}
+
+                {/* 5. LOGIN LOGS TAB */}
+                {activeTab === "logs" && (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-3 gap-3">
+                      <div className="bg-white p-3.5 rounded border border-hotel-stone/30">
+                        <span className="block text-[10px] font-semibold uppercase tracking-wider text-hotel-stone">
+                          Total Events
+                        </span>
+                        <span className="font-serif text-2xl text-hotel-charcoal">
+                          {loginLogs.length}
+                        </span>
+                      </div>
+                      <div className="bg-white p-3.5 rounded border border-emerald-200">
+                        <span className="block text-[10px] font-semibold uppercase tracking-wider text-emerald-700">
+                          Successful Logins
+                        </span>
+                        <span className="font-serif text-2xl text-emerald-800">
+                          {loginLogs.filter((l) => l.status === "success").length}
+                        </span>
+                      </div>
+                      <div className="bg-white p-3.5 rounded border border-red-200">
+                        <span className="block text-[10px] font-semibold uppercase tracking-wider text-red-700">
+                          Failed Attempts
+                        </span>
+                        <span className="font-serif text-2xl text-red-800">
+                          {loginLogs.filter((l) => l.status === "failed").length}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap items-center justify-between gap-2 bg-white p-3 rounded border border-hotel-stone/30">
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        {(["all", "success", "failed", "logout"] as const).map((f) => (
+                          <button
+                            key={f}
+                            type="button"
+                            onClick={() => setLogFilter(f)}
+                            className={`px-3 py-1 rounded text-[11px] font-semibold uppercase tracking-wider transition-colors ${
+                              logFilter === f
+                                ? "bg-hotel-charcoal text-hotel-beige"
+                                : "bg-hotel-sand/30 text-hotel-stone hover:bg-hotel-sand/60"
+                            }`}
+                          >
+                            {f}
+                          </button>
+                        ))}
+                      </div>
+
+                      {loginLogs.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const rowsToExport = loginLogs.filter((l) =>
+                              logFilter === "all" ? true : l.status === logFilter
+                            );
+                            const escapeCsv = (val: string) =>
+                              `"${String(val ?? "").replace(/"/g, '""')}"`;
+                            const headers = [
+                              "ID",
+                              "Timestamp (ISO)",
+                              "Local Time",
+                              "Status",
+                              "Username",
+                              "Route",
+                              "Device",
+                            ];
+                            const csvLines = [
+                              headers.map(escapeCsv).join(","),
+                              ...rowsToExport.map((entry) =>
+                                [
+                                  entry.id,
+                                  entry.timestamp,
+                                  new Date(entry.timestamp).toLocaleString(),
+                                  entry.status.toUpperCase(),
+                                  entry.username,
+                                  entry.route,
+                                  entry.device,
+                                ]
+                                  .map(escapeCsv)
+                                  .join(",")
+                              ),
+                            ];
+                            const blob = new Blob(
+                              ["\uFEFF" + csvLines.join("\r\n")],
+                              { type: "text/csv;charset=utf-8;" }
+                            );
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement("a");
+                            const dateTag = new Date().toISOString().slice(0, 10);
+                            a.href = url;
+                            a.download = `casachitic-admin-login-logs-${dateTag}.csv`;
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                            URL.revokeObjectURL(url);
+                          }}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold text-hotel-charcoal bg-hotel-gold/25 hover:bg-hotel-gold border border-hotel-gold/50 transition-colors"
+                        >
+                          <Download className="h-3.5 w-3.5" />
+                          <span>Save to CSV</span>
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="bg-white rounded border border-hotel-stone/30 overflow-hidden">
+                      {loginLogs.filter((l) =>
+                        logFilter === "all" ? true : l.status === logFilter
+                      ).length === 0 ? (
+                        <div className="p-8 text-center text-xs text-hotel-stone">
+                          No login activity recorded yet.
+                        </div>
+                      ) : (
+                        <div className="divide-y divide-hotel-stone/20 max-h-80 overflow-y-auto">
+                          {loginLogs
+                            .filter((l) =>
+                              logFilter === "all" ? true : l.status === logFilter
+                            )
+                            .map((entry) => (
+                              <div
+                                key={entry.id}
+                                className="p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs hover:bg-hotel-sand/15 transition-colors"
+                              >
+                                <div className="flex items-center gap-3">
+                                  <span
+                                    className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider shrink-0 ${
+                                      entry.status === "success"
+                                        ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
+                                        : entry.status === "failed"
+                                        ? "bg-red-100 text-red-800 border border-red-200"
+                                        : "bg-stone-100 text-stone-700 border border-stone-200"
+                                    }`}
+                                  >
+                                    {entry.status}
+                                  </span>
+                                  <div>
+                                    <span className="font-semibold text-hotel-charcoal">
+                                      User: <code className="font-mono bg-hotel-sand/30 px-1.5 py-0.5 rounded">{entry.username}</code>
+                                    </span>
+                                    <span className="block text-[11px] text-hotel-stone mt-0.5">
+                                      {entry.device} • Route: <code className="font-mono">{entry.route}</code>
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="text-[11px] text-hotel-stone font-mono sm:text-right shrink-0">
+                                  {new Date(entry.timestamp).toLocaleString()}
+                                </div>
+                              </div>
+                            ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}

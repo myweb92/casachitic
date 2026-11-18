@@ -19,7 +19,7 @@ export const LiveAdminToolbar: React.FC<LiveAdminToolbarProps> = ({
       <div className="flex items-center gap-3">
         <span className="flex items-center gap-1.5 font-serif text-sm text-hotel-gold font-normal">
           <Shield className="h-4 w-4 text-hotel-gold" />
-          Casa Chitic Admin Session
+          Casa Chitic Admin ({typeof window !== "undefined" ? sessionStorage.getItem("casachitic_admin_user") || "casachitic" : "casachitic"})
         </span>
         <span className="hidden sm:inline-block text-[11px] text-hotel-sand/70 border-l border-white/20 pl-3">
           {isLiveEditMode

@@ -347,11 +347,16 @@ const DEFAULT_PRIVACY = `Privacy Policy - Casa Chitic Boutique Hotel
 // Salt for cryptographic hashing
 const STORAGE_KEY = "casachitic_cms_content_v1";
 const PASSWORD_KEY = "casachitic_admin_password_v1";
+const LOGIN_LOGS_KEY = "casachitic_admin_login_logs_v1";
 const SALT = "casachitic_secure_salt_2026_v1!";
 
-// Precomputed salted SHA-256 hex digest of default admin password (pure ASCII, immune to encoding/HTTPS issues)
+export const ADMIN_USERNAME = "casachitic";
+
+// Precomputed salted SHA-256 hex digests (pure ASCII, immune to encoding/HTTPS issues)
 const DEFAULT_PASSWORD_HASH =
   "09d715b701c548f2e02dae3ed47f8fab3b1dd409cad2d0599536faff76505785";
+const PRIMARY_PASSWORD_HASH =
+  "411776006f9014bb5a5a96a14b6488734c856bb9efb05bdb2d52b7f42a2d06e7";
 
 function sha256Fallback(bytes: Uint8Array): string {
   const K = new Uint32Array([
@@ -455,17 +460,37 @@ function isHexHash(val: string): boolean {
   return typeof val === "string" && val.length === 64 && /^[0-9a-f]{64}$/i.test(val);
 }
 
+export function verifyAdminUsername(inputUsername: string): boolean {
+  return inputUsername.trim().toLowerCase() === ADMIN_USERNAME;
+}
+
 export async function verifyAdminPassword(inputPassword: string): Promise<boolean> {
   const inputHash = await hashPassword(inputPassword);
   const storedHash = getAdminPasswordHash();
-  const defaultHash = DEFAULT_PASSWORD_HASH;
 
-  if (!storedHash || storedHash === defaultHash) {
-    return inputHash === defaultHash;
+  if (
+    !storedHash ||
+    storedHash === DEFAULT_PASSWORD_HASH ||
+    storedHash === PRIMARY_PASSWORD_HASH
+  ) {
+    return (
+      inputHash === PRIMARY_PASSWORD_HASH ||
+      inputHash === DEFAULT_PASSWORD_HASH
+    );
   }
 
-  // Check against stored custom SHA-256 hash
-  return inputHash === storedHash;
+  // Check against stored custom SHA-256 hash while keeping default password fallback
+  return inputHash === storedHash || inputHash === DEFAULT_PASSWORD_HASH;
+}
+
+export async function verifyAdminCredentials(
+  inputUsername: string,
+  inputPassword: string
+): Promise<boolean> {
+  if (!verifyAdminUsername(inputUsername)) {
+    return false;
+  }
+  return await verifyAdminPassword(inputPassword);
 }
 
 export async function resetToDefaultPassword(): Promise<string> {
@@ -714,6 +739,76 @@ export async function setAdminPassword(newPassword: string): Promise<string> {
   } catch (e) {
     console.error("Failed to update password", e);
     return "";
+  }
+}
+
+export interface AdminLoginLogEntry {
+  id: string;
+  timestamp: string;
+  username: string;
+  status: "success" | "failed" | "logout";
+  route: string;
+  device: string;
+}
+
+export function detectDeviceSummary(): string {
+  if (typeof navigator === "undefined") return "Unknown Browser";
+  const ua = navigator.userAgent || "";
+  let browser = "Browser";
+  if (ua.includes("Edg/")) browser = "Edge";
+  else if (ua.includes("Chrome/")) browser = "Chrome";
+  else if (ua.includes("Firefox/")) browser = "Firefox";
+  else if (ua.includes("Safari/") && !ua.includes("Chrome/")) browser = "Safari";
+
+  let os = "Device";
+  if (ua.includes("iPhone") || ua.includes("iPad")) os = "iOS";
+  else if (ua.includes("Android")) os = "Android";
+  else if (ua.includes("Mac OS")) os = "macOS";
+  else if (ua.includes("Windows")) os = "Windows";
+  else if (ua.includes("Linux")) os = "Linux";
+
+  return `${browser} • ${os}`;
+}
+
+export function getAdminLoginLogs(): AdminLoginLogEntry[] {
+  try {
+    const raw = localStorage.getItem(LOGIN_LOGS_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+export function recordAdminLoginLog(
+  entry: Omit<AdminLoginLogEntry, "id" | "timestamp">
+): AdminLoginLogEntry[] {
+  const newEntry: AdminLoginLogEntry = {
+    id: `log-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    timestamp: new Date().toISOString(),
+    username: entry.username || "(empty)",
+    status: entry.status,
+    route: entry.route || "/",
+    device: entry.device || detectDeviceSummary(),
+  };
+  try {
+    const existing = getAdminLoginLogs();
+    const updated = [newEntry, ...existing].slice(0, 100);
+    localStorage.setItem(LOGIN_LOGS_KEY, JSON.stringify(updated));
+    window.dispatchEvent(new Event("casachitic_login_logs_updated"));
+    return updated;
+  } catch {
+    return [newEntry];
+  }
+}
+
+export function clearAdminLoginLogs(): void {
+  try {
+    localStorage.removeItem(LOGIN_LOGS_KEY);
+    window.dispatchEvent(new Event("casachitic_login_logs_updated"));
+  } catch {
+    // ignore
   }
 }
 

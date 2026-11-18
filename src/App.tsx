@@ -14,6 +14,11 @@ import ContactLocation from "./components/ContactLocation";
 import Footer from "./components/Footer";
 import AdminPanel from "./components/AdminPanel";
 import { LiveAdminToolbar } from "./components/LiveAdminToolbar";
+import {
+  ADMIN_USERNAME,
+  detectDeviceSummary,
+  recordAdminLoginLog,
+} from "./lib/cmsStore";
 
 export default function App() {
   const [lang, setLang] = useState<Language>("en"); // Default to English
@@ -75,10 +80,10 @@ export default function App() {
       if (
         path === "/admin" ||
         path.endsWith("/admin") ||
-        path === "/padmin" ||
-        path.endsWith("/padmin") ||
+        path === "/cpanel" ||
+        path.endsWith("/cpanel") ||
         hash === "#admin" ||
-        hash === "#padmin"
+        hash === "#cpanel"
       ) {
         setIsAdminOpen(true);
       }
@@ -106,20 +111,33 @@ export default function App() {
   const handleOpenAdmin = () => {
     setIsAdminOpen(true);
     const path = window.location.pathname.toLowerCase().replace(/\/+$/, "");
-    if (path !== "/admin" && path !== "/padmin") {
-      window.history.pushState(null, "", "/padmin");
+    if (path !== "/admin" && path !== "/cpanel") {
+      window.history.pushState(null, "", "/cpanel");
     }
   };
 
   const handleCloseAdmin = () => {
     setIsAdminOpen(false);
     const path = window.location.pathname.toLowerCase().replace(/\/+$/, "");
-    if (path === "/admin" || path === "/padmin") {
+    if (path === "/admin" || path === "/cpanel") {
       window.history.pushState(null, "", "/");
     }
   };
 
   const handleLogoutAdmin = () => {
+    let activeUser = ADMIN_USERNAME;
+    try {
+      activeUser = sessionStorage.getItem("casachitic_admin_user") || ADMIN_USERNAME;
+      sessionStorage.removeItem("casachitic_admin_user");
+    } catch {
+      // ignore
+    }
+    recordAdminLoginLog({
+      username: activeUser,
+      status: "logout",
+      route: window.location.pathname || "/",
+      device: detectDeviceSummary(),
+    });
     setIsAuthenticated(false);
     setIsLiveEditMode(false);
     setIsAdminOpen(false);
