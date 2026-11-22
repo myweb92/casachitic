@@ -132,7 +132,7 @@ export default function AdminPanel({
     setResetNotice(null);
     setLoginError("");
     const attemptedUser = usernameInput.trim();
-    const currentRoute = window.location.pathname || "/cpanel";
+    const currentRoute = window.location.pathname || "/padmin";
     const currentDevice = detectDeviceSummary();
 
     try {
@@ -189,7 +189,7 @@ export default function AdminPanel({
     recordAdminLoginLog({
       username: activeUser,
       status: "logout",
-      route: window.location.pathname || "/cpanel",
+      route: window.location.pathname || "/padmin",
       device: detectDeviceSummary(),
     });
     setIsAuthenticated(false);

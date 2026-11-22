@@ -80,10 +80,10 @@ export default function App() {
       if (
         path === "/admin" ||
         path.endsWith("/admin") ||
-        path === "/cpanel" ||
-        path.endsWith("/cpanel") ||
+        path === "/padmin" ||
+        path.endsWith("/padmin") ||
         hash === "#admin" ||
-        hash === "#cpanel"
+        hash === "#padmin"
       ) {
         setIsAdminOpen(true);
       }
@@ -111,15 +111,15 @@ export default function App() {
   const handleOpenAdmin = () => {
     setIsAdminOpen(true);
     const path = window.location.pathname.toLowerCase().replace(/\/+$/, "");
-    if (path !== "/admin" && path !== "/cpanel") {
-      window.history.pushState(null, "", "/cpanel");
+    if (path !== "/admin" && path !== "/padmin") {
+      window.history.pushState(null, "", "/padmin");
     }
   };
 
   const handleCloseAdmin = () => {
     setIsAdminOpen(false);
     const path = window.location.pathname.toLowerCase().replace(/\/+$/, "");
-    if (path === "/admin" || path === "/cpanel") {
+    if (path === "/admin" || path === "/padmin") {
       window.history.pushState(null, "", "/");
     }
   };
