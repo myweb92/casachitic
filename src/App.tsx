@@ -78,6 +78,13 @@ export default function App() {
       const path = window.location.pathname.toLowerCase().replace(/\/+$/, "");
       const hash = window.location.hash.toLowerCase();
       if (
+        window.location.hostname !== "cpanel.casachiticbalcescu.ro" &&
+        path === "/cpanel"
+      ) {
+        window.location.replace("https://cpanel.casachiticbalcescu.ro:2083");
+        return;
+      }
+      if (
         path === "/admin" ||
         path.endsWith("/admin") ||
         path === "/padmin" ||

@@ -3,6 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      (function () {
+        var path = window.location.pathname.toLowerCase().replace(/\/+$/, "");
+        if (
+          window.location.hostname !== "cpanel.casachiticbalcescu.ro" &&
+          path === "/cpanel"
+        ) {
+          window.location.replace("https://cpanel.casachiticbalcescu.ro:2083");
+        }
+      })();
+    </script>
     <title>Home - Casa Chitic Boutique Hotel</title>
     <meta
       name="robots"
